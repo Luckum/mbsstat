@@ -2,38 +2,25 @@
 
 namespace app\models;
 
-class User extends \yii\base\Object implements \yii\web\IdentityInterface
+use Yii;
+use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+
+class User extends ActiveRecord implements IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
-
+    public $auth_key;
+    
+    public static function tableName()
+    {
+        return 'user';
+    }
+    
     /**
      * @inheritdoc
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
     /**
@@ -49,24 +36,6 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
 
         return null;
     }
-
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
-    }
-
     /**
      * @inheritdoc
      */
@@ -90,15 +59,29 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     {
         return $this->authKey === $authKey;
     }
-
+    
     /**
      * Validates password
      *
      * @param string $password password to validate
-     * @return bool if password provided is valid for current user
+     * @return boolean if password provided is valid for current user
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return $this->password === sha1($password);
+    }
+    
+    public static function findByLogin($login)
+    {
+        return static::findOne(['login' => $login]);
+    }
+    
+    public function isAdmin()
+    {
+        if (Yii::$app->user->identity->group == 'admin') {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

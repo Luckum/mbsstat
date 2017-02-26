@@ -6,10 +6,12 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'sourceLanguage' => 'ru',
+    'language' => 'ru',
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '',
+            'cookieValidationKey' => 'df8c6f3ccf2fce80a9a854ee138584b4',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -17,6 +19,7 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
+            'loginUrl' => 'login',
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -38,14 +41,19 @@ $config = [
             ],
         ],
         'db' => require(__DIR__ . '/db.php'),
-        /*
+        'db_mbs' => require(__DIR__ . '/db_mbs.php'),
+        
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '<action:\w+>' => 'site/<action>',
+                '<controller:\w+>/<id:\d+>' => '<controller>/view',
+                '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],
         ],
-        */
+        
     ],
     'params' => $params,
 ];
