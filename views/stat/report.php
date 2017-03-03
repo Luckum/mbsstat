@@ -6,6 +6,7 @@ use app\models\Product;
 use app\models\ProductSold;
 use app\models\Income;
 use yii\bootstrap\Modal;
+use kartik\editable\Editable;
 
 $thisMonth = date("Y-m-01");
 $totalRevenue = $totalRevenueClear = 0;
@@ -49,13 +50,23 @@ $totalRevenue = $totalRevenueClear = 0;
                             <td><?= $product['product_name']; ?></td>
                             <td><?= number_format(sprintf("%01.2f", $product['price_selling'] - $product['price_purchase']), 2, '.', ' '); ?></td>
                             <td><?= number_format($product['price_purchase'], 2, '.', ' '); ?></td>
-                            <td><?= number_format($product['price_selling'], 2, '.', ' '); ?></td>
+                            <td style="cursor: pointer;" onclick="changePriceSelling(this);" id="td_price_selling_<?= $product['id']; ?>">
+                                <span><?= number_format($product['price_selling'], 2, '.', ' '); ?></span>
+                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
+                                <input type="hidden" name="site_id_td" value="<?= $product['site_id']; ?>">
+                                <input type="hidden" name="site_name_td" value="<?= $product['name']; ?>">
+                            </td>
                             <td><?= $product['amount_supplied']; ?></td>
                             <td><?= !empty($amount_sold['amount']) ? $amount_sold['amount'] : 0; ?></td>
                             <td><?= $product['amount_supplied'] - $amount_sold['amount']; ?></td>
                             <td><?= number_format(sprintf("%01.2f", ($product['price_selling'] - $product['price_purchase']) * $amount_sold['amount']), 2, '.', ' '); ?></td>
-                            <td><?= number_format(sprintf("%01.2f", $product['price_selling'] * $amount_sold['amount']), 2, '.', ' '); ?></td>
-                            <td><?= $product['comment']; ?></td>
+                            <td id="td_income_<?= $product['id']; ?>"><?= number_format(sprintf("%01.2f", $product['price_selling'] * $amount_sold['amount']), 2, '.', ' '); ?></td>
+                            <td style="cursor: pointer;" onclick="changeComment(this);" id="td_comment_<?= $product['id']; ?>">
+                                <span><?= $product['comment']; ?></span>
+                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
+                                <input type="hidden" name="site_id_td" value="<?= $product['site_id']; ?>">
+                                <input type="hidden" name="site_name_td" value="<?= $product['name']; ?>">
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -180,3 +191,41 @@ $totalRevenue = $totalRevenueClear = 0;
             </div>
         </div>
 </div>
+
+<?php Modal::begin([
+    'id' => 'price_selling_modal',
+    'header' => '<h4>' . 'Изменить цену' . '</h4>',
+    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                 <button id="update-price_selling" class="btn btn-success" type="submit" onclick="updatePriceSelling()" data-dismiss="modal">' . 'Сохранить' . '</button>',
+]); ?>
+    
+    <form action="" method="post" id="price-selling-update-form">
+        <div class="form-group">
+            <p><label id="site_name_label" class="control-label"></label></p>
+            <label for="price_selling_update" class="control-label">Продажная цена, руб.</label>
+            <input type="text" class="form-control" id="price_selling_update" name="price_selling">
+            <input type="hidden" id="product_id_update" value="">
+            <input type="hidden" id="site_id_update" value="">
+        </div>
+    </form>
+
+<?php Modal::end(); ?>
+
+<?php Modal::begin([
+    'id' => 'comment_modal',
+    'header' => '<h4>' . 'Изменить комментарий' . '</h4>',
+    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                 <button id="update-comment" class="btn btn-success" type="submit" onclick="updateComment()" data-dismiss="modal">' . 'Сохранить' . '</button>',
+]); ?>
+    
+    <form action="" method="post" id="comment-update-form">
+        <div class="form-group">
+            <p><label id="site_name_label_c" class="control-label"></label></p>
+            <label for="comment_update" class="control-label">Комментарий</label>
+            <textarea class="form-control" id="comment_update" name="comment" rows="5"></textarea>
+            <input type="hidden" id="product_id_update_c" value="">
+            <input type="hidden" id="site_id_update_c" value="">
+        </div>
+    </form>
+
+<?php Modal::end(); ?>

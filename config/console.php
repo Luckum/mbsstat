@@ -21,6 +21,8 @@ $config = [
             ],
         ],
         'db' => $db,
+        'db_mbs' => require(__DIR__ . '/db_mbs.php'),
+        'db_sd' => require(__DIR__ . '/db_sd.php'),
     ],
     'params' => $params,
     /*

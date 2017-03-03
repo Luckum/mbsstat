@@ -10,6 +10,7 @@ use app\models\Outlay;
 use app\models\Income;
 use app\models\Pickup;
 use app\models\Product;
+use app\models\ProductDetail;
 
 class StatController extends ProtectedController
 {
@@ -123,7 +124,8 @@ class StatController extends ProtectedController
         $income = Income::getIncomeByMonth(Income::GROUP_REVENUE, $thisMonth);
         $outlays = Outlay::getTotalByMonth($thisMonth);
         $totalPickup = Pickup::getTotalByMonth($thisMonth);
-        $cashbox = $income->amount - $outlays - $totalPickup;
+        $incomeAmount = $income ? $income->amount : 0;
+        $cashbox = $incomeAmount - $outlays - $totalPickup;
         return $cashbox;
     }
 }

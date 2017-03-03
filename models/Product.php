@@ -15,7 +15,6 @@ use yii\db\Query;
  * @property string $price_purchase
  * @property integer $amount_supplied
  * @property integer $amount_in_stock
- * @property integer $details_id
  *
  * @property Category $category
  * @property ProductDetail $details
@@ -36,13 +35,12 @@ class Product extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['product_name', 'category_id', 'amount_in_stock', 'details_id'], 'required'],
-            [['category_id', 'amount_supplied', 'amount_in_stock', 'details_id'], 'integer'],
+            [['product_name', 'category_id', 'amount_in_stock'], 'required'],
+            [['category_id', 'amount_supplied', 'amount_in_stock'], 'integer'],
             [['price_purchase'], 'number'],
             [['product_code'], 'string', 'max' => 32],
             [['product_name'], 'string', 'max' => 255],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['category_id' => 'id']],
-            [['details_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductDetail::className(), 'targetAttribute' => ['details_id' => 'id']],
         ];
     }
 
@@ -59,7 +57,6 @@ class Product extends \yii\db\ActiveRecord
             'price_purchase' => 'Price Purchase',
             'amount_supplied' => 'Amount Supplied',
             'amount_in_stock' => 'Amount In Stock',
-            'details_id' => 'Details ID',
         ];
     }
 
@@ -71,14 +68,6 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasOne(Category::className(), ['id' => 'category_id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getDetails()
-    {
-        return $this->hasOne(ProductDetail::className(), ['id' => 'details_id']);
-    }
-    
     public static function getProductsByCategory($categoryId)
     {
         $query = new Query;
@@ -88,7 +77,7 @@ class Product extends \yii\db\ActiveRecord
                 'site.name'
             ])
             ->from('product')
-            ->join('LEFT JOIN', 'product_detail', 'product.details_id=product_detail.id')
+            ->join('LEFT JOIN', 'product_detail', 'product.id=product_detail.inner_product_id')
             ->join('LEFT JOIN', 'site', 'product_detail.site_id=site.id')
             ->where(['category_id' => $categoryId]);
         
@@ -111,4 +100,27 @@ class Product extends \yii\db\ActiveRecord
         return $residue['sum'];
     }
     
+    public static function getProducts($categoryId)
+    {
+        return self::findAll([
+            'category_id' => $categoryId
+        ]);
+    }
+    
+    public static function getProductById($id)
+    {
+        $query = new Query;
+        $query->select([
+                'product.*',
+                'product_detail.*',
+                'site.name'
+            ])
+            ->from('product')
+            ->join('LEFT JOIN', 'product_detail', 'product.id=product_detail.inner_product_id')
+            ->join('LEFT JOIN', 'site', 'product_detail.site_id=site.id')
+            ->where(['product.id' => $id]);
+        
+        $command = $query->createCommand();
+        return $command->queryOne();
+    }
 }

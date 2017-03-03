@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\Products;
 
 /**
  * This is the model class for table "{{%product_prices}}".
@@ -58,9 +59,11 @@ class ProductPrices extends \yii\db\ActiveRecord
         ];
     }
     
-    public static function getProductPrice($id)
+    public static function getProductPriceByCode($code)
     {
-        $sql = 'SELECT price FROM ' . self::tableName() . ' WHERE product_id = :product_id';
-        return self::findBySql($sql, ['product_id' => $id])->one();
+        $sql = 'SELECT cpp.price, cpp.product_id FROM ' . self::tableName() . ' 
+                LEFT JOIN ' . Products::tableName() . ' cp ON cpp.product_id = cp.product_id
+                WHERE product_code = :product_code';
+        return self::findBySql($sql, ['product_code' => $code])->one();
     }
 }

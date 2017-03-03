@@ -67,6 +67,8 @@ use app\models\OrderDetails;
  */
 class Orders extends \yii\db\ActiveRecord
 {
+    public static $db;
+    
     /**
      * @inheritdoc
      */
@@ -80,7 +82,7 @@ class Orders extends \yii\db\ActiveRecord
      */
     public static function getDb()
     {
-        return Yii::$app->get('db_mbs');
+        return self::$db;
     }
 
     /**
@@ -175,8 +177,8 @@ class Orders extends \yii\db\ActiveRecord
         $nextMonth = mktime(0, 0, 0, date('m') + 1, 1, date('Y'));
         $sql = "SELECT SUM(cod.amount) AS total FROM " . self::tableName() . " co
                 LEFT JOIN " . OrderDetails::tableName() . " cod ON co.order_id = cod.order_id
-                WHERE co.timestamp > " . $thisMonth . " AND co.timestamp < " . $nextMonth . " AND cod.product_code = '" . $product_code . "'";
-                
+                WHERE co.timestamp > " . $thisMonth . " AND co.timestamp < " . $nextMonth . " AND cod.product_code = '" . $product_code . "' AND co.status IN ('C', 'X', 'P')";
+        
         return self::findBySql($sql)->one();
     }
 }

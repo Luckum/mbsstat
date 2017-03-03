@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "product_detail".
@@ -31,11 +32,12 @@ class ProductDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['site_id', 'price_selling'], 'required'],
-            [['site_id'], 'integer'],
+            [['site_id', 'price_selling', 'inner_product_id'], 'required'],
+            [['site_id', 'inner_product_id'], 'integer'],
             [['price_selling'], 'number'],
             [['comment'], 'string'],
             [['site_id'], 'exist', 'skipOnError' => true, 'targetClass' => Site::className(), 'targetAttribute' => ['site_id' => 'id']],
+            [['inner_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['inner_product_id' => 'id']],
         ];
     }
 
@@ -55,16 +57,16 @@ class ProductDetail extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProducts()
-    {
-        return $this->hasMany(Product::className(), ['details_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getSite()
     {
         return $this->hasOne(Site::className(), ['id' => 'site_id']);
+    }
+    
+    public static function getDetailsBySite($site_id, $product_id)
+    {
+        return self::findOne([
+            'site_id' => $site_id,
+            'inner_product_id' => $product_id
+        ]);
     }
 }

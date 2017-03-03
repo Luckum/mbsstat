@@ -28,8 +28,10 @@ CREATE TABLE IF NOT EXISTS `product_detail` (
     `price_selling` decimal(12,2) NOT NULL,
     `product_id` int(11) NOT NULL,
     `comment` text DEFAULT NULL,
+    `inner_product_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+    FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+    FOREIGN KEY (`inner_product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `product` (
@@ -40,10 +42,8 @@ CREATE TABLE IF NOT EXISTS `product` (
     `price_purchase` decimal(12,2) NOT NULL DEFAULT '0.00',
     `amount_supplied` int(8) NOT NULL DEFAULT '0',
     `amount_in_stock` int(8) NOT NULL,
-    `details_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-    FOREIGN KEY (`details_id`) REFERENCES `product_detail` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+    FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `product_sold` (
@@ -96,4 +96,26 @@ CREATE TABLE IF NOT EXISTS `ad` (
     `ad_type` enum('C', 'P') NOT NULL,
     `amount` int(11) NOT NULL,
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `product_price` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `product_id` int(11) NOT NULL,
+    `old_price` decimal(12,2) DEFAULT NULL,
+    `new_price` decimal(12,2) DEFAULT NULL,
+    `old_price_purchase` decimal(12,2) NOT NULL,
+    `new_price_purchase` decimal(12,2) NOT NULL,
+    `amount` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `product_render` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `product_id` int(11) NOT NULL,
+    `amount` int(11) NOT NULL,
+    `render_price` decimal(12,2) NOT NULL,
+    `render_date` DATE NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;

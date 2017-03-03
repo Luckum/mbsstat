@@ -53,18 +53,15 @@ class Ad extends \yii\db\ActiveRecord
             'amount' => 'Amount',
         ];
     }
-
-    public static function getAds()
+    
+    public static function getAdTotal()
     {
-        $query = new Query;
-        $query->select([
-                'ad.*',
-                'ad_public.*'
-            ])
-            ->from('ad')
-            ->join('LEFT JOIN', 'ad_public', 'ad_public.ad_id = ad.id');
-            
+        $query = new Query();
+        $query->select(['SUM(price) AS price'])
+            ->from(self::tableName());
+        
         $command = $query->createCommand();
-        return $command->queryAll();
+        $ad = $command->queryOne();
+        return $ad['price'];
     }
 }

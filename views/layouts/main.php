@@ -39,6 +39,8 @@ $this->title = Yii::$app->params['name'];
         'items' => [
             ['label' => 'Отчет', 'url' => ['/stat/report']],
             ['label' => 'Реклама', 'url' => ['/ad/index']],
+            ['label' => 'Принять товар', 'url' => ['/product/accept']],
+            ['label' => 'Списать товар', 'url' => ['/product/render']],
             ['label' => 'Синхронизация', 'url' => ['/sync/index']],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
