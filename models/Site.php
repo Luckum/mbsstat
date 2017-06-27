@@ -51,4 +51,11 @@ class Site extends \yii\db\ActiveRecord
     {
         return $this->hasMany(ProductDetail::className(), ['site_id' => 'id']);
     }
+    
+    public static function saveSyncDate($siteId)
+    {
+        $site = self::findOne($siteId);
+        $site->last_sync_date = date("Y-m-d H:i:s");
+        $site->save();
+    }
 }

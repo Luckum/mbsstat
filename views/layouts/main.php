@@ -41,7 +41,7 @@ $this->title = Yii::$app->params['name'];
             ['label' => 'Реклама', 'url' => ['/ad/index']],
             ['label' => 'Принять товар', 'url' => ['/product/accept']],
             ['label' => 'Списать товар', 'url' => ['/product/render']],
-            ['label' => 'Синхронизация', 'url' => ['/sync/index']],
+            ['label' => 'Синхронизация', 'url' => ['/sync/index'], 'active' => Yii::$app->controller->id == 'sync'],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
             ) : (

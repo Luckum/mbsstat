@@ -9,7 +9,6 @@ use yii\bootstrap\Modal;
 use kartik\editable\Editable;
 
 $thisMonth = date("Y-m-01");
-$totalRevenue = $totalRevenueClear = 0;
 ?>
 
 
@@ -43,13 +42,15 @@ $totalRevenue = $totalRevenueClear = 0;
                 </thead>
                 <tbody>
                     <?php foreach ($products as $product): ?>
-                        <?php $amount_sold = ProductSold::getTotalByProduct($product['id'], $thisMonth); ?>
-                        <?php $totalRevenue +=  $product['price_selling'] * $amount_sold['amount'];?>
-                        <?php $totalRevenueClear +=  ($product['price_selling'] - $product['price_purchase']) * $amount_sold['amount'];?>
+                        <?php $amount_sold = ProductSold::getTotalByProduct($product['id'], $thisMonth);?>
+                        <?php $amount_sold_amount = isset($amount_sold[0]['amount']) ? $amount_sold[0]['amount'] : 0; ?>
                         <tr>
                             <td><?= $product['product_name']; ?></td>
                             <td><?= number_format(sprintf("%01.2f", $product['price_selling'] - $product['price_purchase']), 2, '.', ' '); ?></td>
-                            <td><?= number_format($product['price_purchase'], 2, '.', ' '); ?></td>
+                            <td style="cursor: pointer;" onclick="changePricePurchase(this);" id="td_price_purchase_<?= $product['id']; ?>">
+                                <span><?= number_format($product['price_purchase'], 2, '.', ' '); ?></span>
+                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
+                            </td>
                             <td style="cursor: pointer;" onclick="changePriceSelling(this);" id="td_price_selling_<?= $product['id']; ?>">
                                 <span><?= number_format($product['price_selling'], 2, '.', ' '); ?></span>
                                 <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
@@ -57,10 +58,24 @@ $totalRevenue = $totalRevenueClear = 0;
                                 <input type="hidden" name="site_name_td" value="<?= $product['name']; ?>">
                             </td>
                             <td><?= $product['amount_supplied']; ?></td>
-                            <td><?= !empty($amount_sold['amount']) ? $amount_sold['amount'] : 0; ?></td>
-                            <td><?= $product['amount_supplied'] - $amount_sold['amount']; ?></td>
-                            <td><?= number_format(sprintf("%01.2f", ($product['price_selling'] - $product['price_purchase']) * $amount_sold['amount']), 2, '.', ' '); ?></td>
-                            <td id="td_income_<?= $product['id']; ?>"><?= number_format(sprintf("%01.2f", $product['price_selling'] * $amount_sold['amount']), 2, '.', ' '); ?></td>
+                            <td style="padding: 0 0 0 8px;">
+                                <table style="width: 100%;">
+                                    
+                                    <tr>
+                                        <td rowspan="3" width="50%"><?= $amount_sold_amount; ?></td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td><?= $product['amount_supplied'] - $amount_sold_amount; ?></td>
+                            <td><?= number_format(sprintf("%01.2f", ($product['price_selling'] - $product['price_purchase']) * $amount_sold_amount), 2, '.', ' '); ?></td>
+                            <td id="td_income_<?= $product['id']; ?>"><?= number_format(sprintf("%01.2f", $product['price_selling'] * $amount_sold_amount), 2, '.', ' '); ?></td>
                             <td style="cursor: pointer;" onclick="changeComment(this);" id="td_comment_<?= $product['id']; ?>">
                                 <span><?= $product['comment']; ?></span>
                                 <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
@@ -225,6 +240,23 @@ $totalRevenue = $totalRevenueClear = 0;
             <textarea class="form-control" id="comment_update" name="comment" rows="5"></textarea>
             <input type="hidden" id="product_id_update_c" value="">
             <input type="hidden" id="site_id_update_c" value="">
+        </div>
+    </form>
+
+<?php Modal::end(); ?>
+
+<?php Modal::begin([
+    'id' => 'price_purchase_modal',
+    'header' => '<h4>' . 'Изменить цену закупки' . '</h4>',
+    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                 <button id="update-price_purchase" class="btn btn-success" type="submit" onclick="updatePricePurchase()" data-dismiss="modal">' . 'Сохранить' . '</button>',
+]); ?>
+    
+    <form action="" method="post" id="price-purchase-update-form">
+        <div class="form-group">
+            <label for="price_purchase_update" class="control-label">Закупочная цена, руб.</label>
+            <input type="text" class="form-control" id="price_purchase_update" name="price_purchase">
+            <input type="hidden" id="product_id_update" value="">
         </div>
     </form>
 

@@ -152,4 +152,17 @@ class ProductController extends ProtectedController
             'details' => $details,
         ]);
     }
+    
+    public function actionUpdatepurchase()
+    {
+        if (is_numeric($_POST['price_purchase'])) {
+            $product = Product::findOne($_POST['product_id']);
+            $product->price_purchase = $_POST['price_purchase'];
+            if ($product->save()) {
+                return $this->renderPartial('_price_purchase_td', [
+                    'product' => $product,
+                ]);
+            }
+        }
+    }
 }

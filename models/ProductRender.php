@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "product_render".
@@ -59,5 +60,16 @@ class ProductRender extends \yii\db\ActiveRecord
     public function getProduct()
     {
         return $this->hasOne(Product::className(), ['id' => 'product_id']);
+    }
+    
+    public static function getRenderTotal($product_id)
+    {
+        $query = new Query();
+        $query->select(['SUM(amount) AS amount', 'SUM(render_price) AS render_price'])
+            ->from(self::tableName())
+            ->where(['product_id' => $product_id]);
+        
+        $command = $query->createCommand();
+        return $command->queryOne();
     }
 }

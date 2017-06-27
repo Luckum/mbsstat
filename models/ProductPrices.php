@@ -61,9 +61,9 @@ class ProductPrices extends \yii\db\ActiveRecord
     
     public static function getProductPriceByCode($code)
     {
-        $sql = 'SELECT cpp.price, cpp.product_id FROM ' . self::tableName() . ' 
+        $sql = 'SELECT cpp.price, cpp.product_id FROM ' . self::tableName() . ' cpp
                 LEFT JOIN ' . Products::tableName() . ' cp ON cpp.product_id = cp.product_id
-                WHERE product_code = :product_code';
+                WHERE cp.product_code = :product_code';
         return self::findBySql($sql, ['product_code' => $code])->one();
     }
 }

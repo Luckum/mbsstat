@@ -32,8 +32,8 @@ class ProductDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['site_id', 'price_selling', 'inner_product_id'], 'required'],
-            [['site_id', 'inner_product_id'], 'integer'],
+            [['site_id', 'price_selling', 'inner_product_id', 'product_id'], 'required'],
+            [['site_id', 'inner_product_id', 'product_id'], 'integer'],
             [['price_selling'], 'number'],
             [['comment'], 'string'],
             [['site_id'], 'exist', 'skipOnError' => true, 'targetClass' => Site::className(), 'targetAttribute' => ['site_id' => 'id']],

@@ -5,15 +5,12 @@ namespace app\controllers;
 use Yii;
 use yii\helpers\Url;
 use app\controllers\ProtectedController;
-use app\models\Site;
-use app\models\ProductDescriptions;
-use app\models\Products;
-use app\models\ProductsCategories;
-use app\models\ProductPrices;
-use app\models\ProductDetail;
+use app\models\Sync;
 use app\models\Product;
-use app\models\ProductSold;
 use app\models\Orders;
+use app\models\Site;
+use app\models\Category;
+use app\models\SyncSetting;
 
 class SyncController extends ProtectedController
 {
@@ -59,19 +56,30 @@ class SyncController extends ProtectedController
         $site->save();
         */
         
-        $thisMonth = date("Y-m-01");
         $products = Product::find()->all();
-        foreach ($products as $product) {
-            $total = Orders::getOrdersTotal($product['product_code']);
-            
-            $to_product_sold = new ProductSold();
-            $to_product_sold->sale_date = $thisMonth;
-            $to_product_sold->product_id = $product['id'];
-            $to_product_sold->site_id = $id;
-            $to_product_sold->amount = $total['total'];
-            $to_product_sold->save();
-        }
-        
+        $site = Site::findOne($id);
+        Orders::$db = Yii::$app->get($site->cfg_alias);
+        Sync::saveSold($products, $site->id);
+        Sync::savePrice($products, $site->id);
+        Site::saveSyncDate($site->id);
+        Sync::saveIncome($products);
+                
         $this->redirect(Url::to('sync/index', true));
+    }
+    
+    public function actionSettings()
+    {
+        if (isset($_POST['sync_mbs_save'])) {
+            $data = isset($_POST['sync_mbs']) ? $_POST['sync_mbs'] : [];
+            SyncSetting::saveNewData($data, 1);
+        }
+        if (isset($_POST['sync_sd_save'])) {
+            $data = isset($_POST['sync_sd']) ? $_POST['sync_sd'] : [];
+            SyncSetting::saveNewData($data, 2);
+        }
+        $categories = Category::getCategories();
+        return $this->render('settings', [
+            'categories' => $categories,
+        ]);
     }
 }

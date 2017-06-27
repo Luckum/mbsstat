@@ -1,3 +1,23 @@
+$(document).ready(function() {
+    $("#sync_select_settings_mbs").treeMultiselect({
+        searchable: true,
+        searchParams: ['section', 'text'],
+        startCollapsed: true,
+        enableSelectAll: true
+    });
+    $("#sync_select_settings_sd").treeMultiselect({
+        searchable: true,
+        searchParams: ['section', 'text'],
+        startCollapsed: true,
+        enableSelectAll: true
+    });
+    $('.search').focus(function() {
+        $(this).attr('placeholder', '')
+    }).blur(function() {
+        $(this).attr('placeholder', 'Поиск...')
+    })
+});
+
 function addOutlay()
 {
     var html = $.ajax({
@@ -165,5 +185,37 @@ function getRenderProductDetails(obj)
     }).responseText;
     if (html != '') {
         $("#render-product-details").html(html);
+    }
+}
+
+function changePricePurchase(obj)
+{
+    $("#price_purchase_update").val($(obj).find("span").html().replace(/\s{1,}/g, ''));
+    $("#product_id_update").val($(obj).find("[name=product_id_td]").val());
+    $("#price_purchase_modal").modal('show');
+}
+
+function updatePricePurchase()
+{
+    var html = $.ajax({
+        url: "/product/updatepurchase",
+        async: false,
+        type: "POST",
+        data: {product_id: $("#product_id_update").val(), price_purchase: $("#price_purchase_update").val()}
+    }).responseText;
+    
+    if (html != '') {
+        $('#td_price_purchase_'+$("#product_id_update").val()).html(html);
+    }
+    
+    var html = $.ajax({
+        url: "/product/updateincome",
+        async: false,
+        type: "POST",
+        data: {product_id: $("#product_id_update").val(), site_id:  $("#site_id_update").val(), price_selling: $("#price_selling_update").val()}
+    }).responseText;
+    
+    if (html != '') {
+        $('#td_income_'+$("#product_id_update").val()).html(html);
     }
 }

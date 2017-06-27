@@ -3,10 +3,10 @@ namespace app\commands;
 
 use Yii;
 use yii\console\Controller;
-use app\models\Orders;
+use app\models\Sync;
 use app\models\Product;
-use app\models\ProductSold;
-use app\models\ProductPrices;
+use app\models\Orders;
+use app\models\Site;
 
 class SyncController extends Controller
 {
@@ -15,39 +15,25 @@ class SyncController extends Controller
         echo "sync start" . "\n";
         
         $products = Product::find()->all();
-        Orders::$db = Yii::$app->get('db_mbs');
-        $this->saveSold($products, 1);
-        Orders::$db = Yii::$app->get('db_sd');
+        $sites = Site::find()->all();
+        foreach ($sites as $site) {
+            Orders::$db = Yii::$app->get($site->cfg_alias);
+            Sync::saveSold($products, $site->id);
+            Sync::savePrice($products, $site->id);
+            Site::saveSyncDate($site->id);
+        }
+        
+        /*Orders::$db = Yii::$app->get('db_sd');
         $this->saveSold($products, 2);
+        $this->savePrice($products, 2);*/
+        
+        Sync::saveIncome($products);
+        echo "sync finish";
     }
     
-    protected function saveSold($products, $site_id)
-    {
-        $thisMonth = date("Y-m-01");
-        foreach ($products as $product) {
-            $total = Orders::getOrdersTotal($product->product_code);
-            if ($total) {
-                $product_sold = ProductSold::findOne([
-                    'product_id' => $product->id,
-                    'sale_date' => $thisMonth,
-                    'site_id' => $site_id
-                ]);
-                if (!$product_sold) {
-                    $product_sold = new ProductSold();
-                    $product_sold->product_id = $product->id;
-                    $product_sold->sale_date = $thisMonth;
-                    $product_sold->site_id = $site_id;
-                }
-                $product_sold->amount = $total['total'];
-                $product_sold->save();
-            }
-        }
-    }
     
-    protected function savePrice($products, $site_id)
-    {
-        foreach ($products as $product) {
-            $price = ProductPrices::getProductPriceByCode($product->product_code);
-        }
-    }
+    
+    
+    
+    
 }

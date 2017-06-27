@@ -5,25 +5,23 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "product_sold".
+ * This is the model class for table "sync_setting".
  *
  * @property integer $id
- * @property string $sale_date
  * @property integer $product_id
  * @property integer $site_id
- * @property integer $amount
  *
  * @property Product $product
  * @property Site $site
  */
-class ProductSold extends \yii\db\ActiveRecord
+class SyncSetting extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'product_sold';
+        return 'sync_setting';
     }
 
     /**
@@ -32,9 +30,8 @@ class ProductSold extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['sale_date', 'product_id', 'site_id', 'amount'], 'required'],
-            [['sale_date'], 'safe'],
-            [['product_id', 'site_id', 'amount'], 'integer'],
+            [['product_id', 'site_id'], 'required'],
+            [['product_id', 'site_id'], 'integer'],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['product_id' => 'id']],
             [['site_id'], 'exist', 'skipOnError' => true, 'targetClass' => Site::className(), 'targetAttribute' => ['site_id' => 'id']],
         ];
@@ -47,10 +44,8 @@ class ProductSold extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'sale_date' => 'Sale Date',
             'product_id' => 'Product ID',
             'site_id' => 'Site ID',
-            'amount' => 'Amount',
         ];
     }
 
@@ -70,11 +65,19 @@ class ProductSold extends \yii\db\ActiveRecord
         return $this->hasOne(Site::className(), ['id' => 'site_id']);
     }
     
-    public static function getTotalByProduct($id, $month)
+    public static function saveNewData($products, $siteId)
     {
-        return self::findAll([
-            'product_id' => $id,
-            'sale_date' => $month
-        ]);
+        SyncSetting::deleteAll(['site_id' => $siteId]);
+        foreach ($products as $p_id) {
+            $sync = new SyncSetting();
+            $sync->site_id = $siteId;
+            $sync->product_id = $p_id;
+            $sync->save();
+        }
+    }
+    
+    public static function isInSync($product_id, $site_id)
+    {
+        return SyncSetting::find()->where(['product_id' => $product_id, 'site_id' => $site_id])->exists();
     }
 }
