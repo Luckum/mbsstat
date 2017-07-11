@@ -11,18 +11,25 @@ use app\models\Income;
 use app\models\Pickup;
 use app\models\Product;
 use app\models\ProductDetail;
+use app\models\ProductSold;
+use app\models\Site;
 
 class StatController extends ProtectedController
 {
-    public function actionReport()
+    public function actionReport($d = '')
     {
-        $thisMonth = date("Y-m-01");
+        if (!empty($d)) {
+            Yii::$app->params['thisMonth'] = $d;
+        }
+        $thisMonth = Yii::$app->params['thisMonth'];
         $categories = Category::getCategories();
         $outlays = Outlay::getOutlaysByMonth($thisMonth);
         $incomes = Income::getIncomesByMonth($thisMonth);
         $pickups = Pickup::getPickupsByMonth($thisMonth);
         $totalPickup = Pickup::getTotalByMonth($thisMonth);
         $residuePurchase = Product::getResiduePurchase($thisMonth);
+        $sites = Site::find()->all();
+        $statMonthes = ProductSold::getStatMonthes();
         $residueDebt = 0;
         return $this->render('report', [
             'categories' => $categories,
@@ -30,15 +37,18 @@ class StatController extends ProtectedController
             'pickups' => $pickups,
             'incomes' => $incomes,
             'totalPickup' => $totalPickup,
-            'cashbox' => $this->calcCashbox(),
+            'cashbox' => Income::calcCashbox(),
             'residuePurchase' => $residuePurchase,
             'residueDebt' => $residueDebt,
+            'sites' => $sites,
+            'statMonthes' => $statMonthes,
+            'thisMonth' => $thisMonth,
         ]);
     }
     
     public function actionOutlay()
     {
-        $thisMonth = date("Y-m-01");
+        $thisMonth = Yii::$app->params['thisMonth'];
         $error = "";
         if (isset($_POST)) {
             if (isset($_POST['action']) && $_POST['action'] == 'delete') {
@@ -118,14 +128,21 @@ class StatController extends ProtectedController
         ]);
     }
     
-    protected function calcCashbox()
+    public function actionTop($d = '')
     {
-        $thisMonth = date("Y-m-01");
-        $income = Income::getIncomeByMonth(Income::GROUP_REVENUE, $thisMonth);
-        $outlays = Outlay::getTotalByMonth($thisMonth);
-        $totalPickup = Pickup::getTotalByMonth($thisMonth);
-        $incomeAmount = $income ? $income->amount : 0;
-        $cashbox = $incomeAmount - $outlays - $totalPickup;
-        return $cashbox;
+        if (!empty($d)) {
+            Yii::$app->params['thisMonth'] = $d;
+        }
+        $thisMonth = Yii::$app->params['thisMonth'];
+        $statMonthes = ProductSold::getStatMonthes();
+        $categories = Category::getCategories();
+        $tops = ProductSold::getTopSold($thisMonth);
+        
+        return $this->render('top', [
+            'categories' => $categories,
+            'tops' => $tops,
+            'thisMonth' => $thisMonth,
+            'statMonthes' => $statMonthes,
+        ]);
     }
 }

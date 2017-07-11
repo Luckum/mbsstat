@@ -20,6 +20,7 @@ class SyncController extends Controller
             Orders::$db = Yii::$app->get($site->cfg_alias);
             Sync::saveSold($products, $site->id);
             Sync::savePrice($products, $site->id);
+            Sync::saveReport($products, $site->id);
             Site::saveSyncDate($site->id);
         }
         
@@ -27,6 +28,7 @@ class SyncController extends Controller
         $this->saveSold($products, 2);
         $this->savePrice($products, 2);*/
         
+        Sync::saveAmount($products);
         Sync::saveIncome($products);
         echo "sync finish";
     }

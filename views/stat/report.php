@@ -7,12 +7,25 @@ use app\models\ProductSold;
 use app\models\Income;
 use yii\bootstrap\Modal;
 use kartik\editable\Editable;
+use app\models\ProductDetail;
 
-$thisMonth = date("Y-m-01");
+$sitesCnt = count($sites);
 ?>
 
 
-<h3 class="page-header">Отчет</h3>
+<h3 class="page-header">
+    Отчет
+    <div class="btn-group pull-right">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><?= Yii::$app->formatter->asDate($thisMonth, 'LLLL yyyy'); ?>&nbsp;&nbsp;&nbsp;<span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu">
+            <?php foreach ($statMonthes as $sMonth): ?>
+                <?php if ($sMonth['sale_date'] != $thisMonth): ?>
+                    <li><a href="<?= Url::to(['/stat/report', 'd' => $sMonth['sale_date']]); ?>"><?= Yii::$app->formatter->asDate($sMonth['sale_date'], 'LLLL yyyy'); ?></a></li>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</h3>
 <br />
 
 
@@ -25,7 +38,7 @@ $thisMonth = date("Y-m-01");
 
 <div class="tab-content">
     <?php foreach ($categories as $k => $category): ?>
-        <?php $products = Product::getProductsByCategory($category['id']); ?>
+        <?php $products = Product::getProducts($category['id']); ?>
         <div class="tab-pane <?php if ($k == 0): ?>active<?php endif; ?>" id="<?= $category['id']; ?>">
             <table class="table table-striped table-bordered table-hover">
                 <thead>
@@ -42,45 +55,101 @@ $thisMonth = date("Y-m-01");
                 </thead>
                 <tbody>
                     <?php foreach ($products as $product): ?>
-                        <?php $amount_sold = ProductSold::getTotalByProduct($product['id'], $thisMonth);?>
-                        <?php $amount_sold_amount = isset($amount_sold[0]['amount']) ? $amount_sold[0]['amount'] : 0; ?>
                         <tr>
                             <td><?= $product['product_name']; ?></td>
-                            <td><?= number_format(sprintf("%01.2f", $product['price_selling'] - $product['price_purchase']), 2, '.', ' '); ?></td>
-                            <td style="cursor: pointer;" onclick="changePricePurchase(this);" id="td_price_purchase_<?= $product['id']; ?>">
-                                <span><?= number_format($product['price_purchase'], 2, '.', ' '); ?></span>
-                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
-                            </td>
-                            <td style="cursor: pointer;" onclick="changePriceSelling(this);" id="td_price_selling_<?= $product['id']; ?>">
-                                <span><?= number_format($product['price_selling'], 2, '.', ' '); ?></span>
-                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
-                                <input type="hidden" name="site_id_td" value="<?= $product['site_id']; ?>">
-                                <input type="hidden" name="site_name_td" value="<?= $product['name']; ?>">
-                            </td>
-                            <td><?= $product['amount_supplied']; ?></td>
-                            <td style="padding: 0 0 0 8px;">
+                            <td style="padding: 0" id="td_income_clear_<?= $product['id']; ?>">
                                 <table style="width: 100%;">
-                                    
-                                    <tr>
-                                        <td rowspan="3" width="50%"><?= $amount_sold_amount; ?></td>
-                                        <td>1</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                    </tr>
+                                    <?php foreach ($sites as $k => $site): ?>
+                                        <?php $product_details = ProductDetail::getDetailsBySite($site->id, $product['id']); ?>
+                                        <tr>
+                                            <td style="padding: 8px; <?php if (($k + 1) != $sitesCnt): ?>border-bottom: 1px solid #ddd;<?php endif; ?>" class="tooltip-top-td" data-toggle="tooltip" data-placement="top" title="<?= $site->name; ?>">
+                                                <?= number_format(sprintf("%01.2f", $product_details['income_clear']), 2, '.', ' '); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 </table>
                             </td>
-                            <td><?= $product['amount_supplied'] - $amount_sold_amount; ?></td>
-                            <td><?= number_format(sprintf("%01.2f", ($product['price_selling'] - $product['price_purchase']) * $amount_sold_amount), 2, '.', ' '); ?></td>
-                            <td id="td_income_<?= $product['id']; ?>"><?= number_format(sprintf("%01.2f", $product['price_selling'] * $amount_sold_amount), 2, '.', ' '); ?></td>
+                            <td style="cursor: pointer; vertical-align: middle;" onclick="changePricePurchase(this);" id="td_price_purchase_<?= $product['id']; ?>">
+                                <span><?= number_format($product['price_purchase'], 2, '.', ' '); ?></span>
+                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
+                                <input type="hidden" name="product_name_td" value="<?= $product['product_name']; ?>">
+                            </td>
+                            <td style="padding: 0">
+                                <table style="width: 100%;">
+                                    <?php foreach ($sites as $k => $site): ?>
+                                        <?php $product_details = ProductDetail::getDetailsBySite($site->id, $product['id']); ?>
+                                        <tr>
+                                            <td onclick="changePriceSelling(this);" id="td_price_selling_<?= $product['id']; ?>_<?= $site->id; ?>" style="cursor: pointer; padding: 8px; <?php if (($k + 1) != $sitesCnt): ?>border-bottom: 1px solid #ddd;<?php endif; ?>" class="tooltip-top-td" data-toggle="tooltip" data-placement="top" title="<?= $site->name; ?>">
+                                                <span><?= number_format($product_details['price_selling'], 2, '.', ' '); ?></span>
+                                                <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
+                                                <input type="hidden" name="site_id_td" value="<?= $site->id; ?>">
+                                                <input type="hidden" name="site_name_td" value="<?= $site->name; ?>">
+                                                <input type="hidden" name="product_name_td" value="<?= $product['product_name']; ?>">
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </table>
+                            </td>
+                            <td style="vertical-align: middle;"><?= $product['amount_supplied']; ?></td>
+                            <td style="padding: 0;">
+                                <table style="width: 100%;">
+                                    <?php foreach ($sites as $k => $site): ?>
+                                        <?php $product_sold = ProductSold::getTotalBySite($product['id'], $site->id, $thisMonth); ?>
+                                        <tr>
+                                            <?php if ($k == 0): ?>
+                                                <?php $product_sold_total = ProductSold::getSumByProduct($product['id'], $thisMonth); ?>
+                                                <td rowspan="<?= $sitesCnt; ?>" width="50%" style="padding: 8px; border-right: 1px solid #ddd;">
+                                                    <?= !empty($product_sold_total) ? $product_sold_total : 0 ?>
+                                                </td>
+                                            <?php endif; ?>
+                                            <td style="padding: 8px; <?php if (($k + 1) != $sitesCnt): ?>border-bottom: 1px solid #ddd;<?php endif; ?>" class="tooltip-top-td" data-toggle="tooltip" data-placement="top" title="<?= $site->name; ?>">
+                                                <?= isset($product_sold['amount']) ? $product_sold['amount'] : '0'; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </table>
+                            </td>
+                            <td style="vertical-align: middle;"><?= $product['amount_in_stock']; ?></td>
+                            <td style="padding: 0;" id="td_income_clear_total_<?= $product['id']; ?>">
+                                <table style="width: 100%;">
+                                    <?php foreach ($sites as $k => $site): ?>
+                                        <?php $product_sold = ProductSold::getTotalBySite($product['id'], $site->id, $thisMonth); ?>
+                                        <tr>
+                                            <?php if ($k == 0): ?>
+                                                <?php $product_sold_total = ProductSold::getSumIncomeClear($product['id'], $thisMonth); ?>
+                                                <td rowspan="<?= $sitesCnt; ?>" width="50%" style="padding: 8px; border-right: 1px solid #ddd;">
+                                                    <?= number_format(sprintf("%01.2f", $product_sold_total), 2, '.', ' '); ?>
+                                                </td>
+                                            <?php endif; ?>
+                                            <td style="padding: 8px; <?php if (($k + 1) != $sitesCnt): ?>border-bottom: 1px solid #ddd;<?php endif; ?>" class="tooltip-top-td" data-toggle="tooltip" data-placement="top" title="<?= $site->name; ?>">
+                                                <?= number_format(sprintf("%01.2f", $product_sold['income_clear_total']), 2, '.', ' '); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </table>
+                            </td>
+                            <td id="td_income_<?= $product['id']; ?>" style="padding: 0;">
+                                <table style="width: 100%;">
+                                    <?php foreach ($sites as $k => $site): ?>
+                                        <?php $product_sold = ProductSold::getTotalBySite($product['id'], $site->id, $thisMonth); ?>
+                                        <tr>
+                                            <?php if ($k == 0): ?>
+                                                <?php $product_sold_total = ProductSold::getSumIncome($product['id'], $thisMonth); ?>
+                                                <td rowspan="<?= $sitesCnt; ?>" width="50%" style="padding: 8px; border-right: 1px solid #ddd;">
+                                                    <?= number_format(sprintf("%01.2f", $product_sold_total), 2, '.', ' '); ?>
+                                                </td>
+                                            <?php endif; ?>
+                                            <td style="padding: 8px; <?php if (($k + 1) != $sitesCnt): ?>border-bottom: 1px solid #ddd;<?php endif; ?>" class="tooltip-top-td" data-toggle="tooltip" data-placement="top" title="<?= $site->name; ?>">
+                                                <?= number_format(sprintf("%01.2f", $product_sold['income_total']), 2, '.', ' '); ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </table>
+                            </td>
                             <td style="cursor: pointer;" onclick="changeComment(this);" id="td_comment_<?= $product['id']; ?>">
                                 <span><?= $product['comment']; ?></span>
                                 <input type="hidden" name="product_id_td" value="<?= $product['id']; ?>">
-                                <input type="hidden" name="site_id_td" value="<?= $product['site_id']; ?>">
-                                <input type="hidden" name="site_name_td" value="<?= $product['name']; ?>">
+                                <input type="hidden" name="product_name_td" value="<?= $product['product_name']; ?>">
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -147,14 +216,16 @@ $thisMonth = date("Y-m-01");
             <br /><br />
             
             <div id="summary_t">
-                <table class="table table-striped table-bordered table-hover">
-                    <?php foreach ($incomes as $income): ?>
-                        <tr>
-                            <td><?= $income->type; ?></td>
-                            <td><?= number_format($income->amount, 2, '.', ' '); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
+                <div id="revenue-tbl">
+                    <table class="table table-striped table-bordered table-hover">
+                        <?php foreach ($incomes as $income): ?>
+                            <tr>
+                                <td><?= $income->type; ?></td>
+                                <td><?= number_format($income->amount, 2, '.', ' '); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
                 
                 <p><b>ЗАТРАТЫ</b></p>
                 
@@ -186,13 +257,13 @@ $thisMonth = date("Y-m-01");
                         <td><b><?= number_format($totalPickup, 2, '.', ' '); ?> руб.</b></td>
                     </tr>
                 </table>
-                <p><b>В КАССЕ: <?= number_format($cashbox, 2, '.', ' '); ?> руб.</b></p>
+                <p id="cashbox-container"><b>В КАССЕ: <?= number_format($cashbox, 2, '.', ' '); ?> руб.</b></p>
                 
                 <p><b>ОСТАТОК</b></p>
                 <table class="table table-striped table-bordered table-hover">
                     <tr>
                         <td>ЗАКУПОЧНАЯ</td>
-                        <td><?= number_format($residuePurchase, 2, '.', ' '); ?> руб.</td>
+                        <td id="residue-purchase-td"><?= number_format($residuePurchase, 2, '.', ' '); ?> руб.</td>
                     </tr>
                     <tr>
                         <td>ДОЛГОВАЯ</td>
@@ -200,7 +271,7 @@ $thisMonth = date("Y-m-01");
                     </tr>
                     <tr>
                         <td><b>ОБЩАЯ</b></td>
-                        <td><b><?= number_format($residuePurchase + $residueDebt + $cashbox, 2, '.', ' '); ?> руб.</b></td>
+                        <td id="residue-total-td"><b><?= number_format($residuePurchase + $residueDebt + $cashbox, 2, '.', ' '); ?> руб.</b></td>
                     </tr>
                 </table>
             </div>
@@ -216,6 +287,7 @@ $thisMonth = date("Y-m-01");
     
     <form action="" method="post" id="price-selling-update-form">
         <div class="form-group">
+            <p><label id="product_name_label_s" class="control-label"></label></p>
             <p><label id="site_name_label" class="control-label"></label></p>
             <label for="price_selling_update" class="control-label">Продажная цена, руб.</label>
             <input type="text" class="form-control" id="price_selling_update" name="price_selling">
@@ -235,11 +307,10 @@ $thisMonth = date("Y-m-01");
     
     <form action="" method="post" id="comment-update-form">
         <div class="form-group">
-            <p><label id="site_name_label_c" class="control-label"></label></p>
+            <p><label id="product_name_label_c" class="control-label"></label></p>
             <label for="comment_update" class="control-label">Комментарий</label>
             <textarea class="form-control" id="comment_update" name="comment" rows="5"></textarea>
             <input type="hidden" id="product_id_update_c" value="">
-            <input type="hidden" id="site_id_update_c" value="">
         </div>
     </form>
 
@@ -254,6 +325,7 @@ $thisMonth = date("Y-m-01");
     
     <form action="" method="post" id="price-purchase-update-form">
         <div class="form-group">
+            <p><label id="product_name_label" class="control-label"></label></p>
             <label for="price_purchase_update" class="control-label">Закупочная цена, руб.</label>
             <input type="text" class="form-control" id="price_purchase_update" name="price_purchase">
             <input type="hidden" id="product_id_update" value="">

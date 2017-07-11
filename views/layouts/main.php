@@ -38,7 +38,8 @@ $this->title = Yii::$app->params['name'];
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Отчет', 'url' => ['/stat/report']],
-            ['label' => 'Реклама', 'url' => ['/ad/index']],
+            ['label' => 'ТОП ПРОДАЖ', 'url' => ['/stat/top']],
+            ['label' => 'Реклама', 'url' => ['/ad/index'], 'active' => Yii::$app->controller->id == 'ad'],
             ['label' => 'Принять товар', 'url' => ['/product/accept']],
             ['label' => 'Списать товар', 'url' => ['/product/render']],
             ['label' => 'Синхронизация', 'url' => ['/sync/index'], 'active' => Yii::$app->controller->id == 'sync'],

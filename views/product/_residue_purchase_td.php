@@ -1,0 +1,1 @@
+﻿<?= number_format($residuePurchase, 2, '.', ' '); ?> руб.

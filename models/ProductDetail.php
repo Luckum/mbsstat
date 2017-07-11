@@ -11,7 +11,6 @@ use yii\db\Query;
  * @property integer $id
  * @property integer $site_id
  * @property string $price_selling
- * @property string $comment
  *
  * @property Product[] $products
  * @property Site $site
@@ -34,8 +33,7 @@ class ProductDetail extends \yii\db\ActiveRecord
         return [
             [['site_id', 'price_selling', 'inner_product_id', 'product_id'], 'required'],
             [['site_id', 'inner_product_id', 'product_id'], 'integer'],
-            [['price_selling'], 'number'],
-            [['comment'], 'string'],
+            [['price_selling', 'income_clear'], 'number'],
             [['site_id'], 'exist', 'skipOnError' => true, 'targetClass' => Site::className(), 'targetAttribute' => ['site_id' => 'id']],
             [['inner_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['inner_product_id' => 'id']],
         ];
@@ -50,7 +48,6 @@ class ProductDetail extends \yii\db\ActiveRecord
             'id' => 'ID',
             'site_id' => 'Site ID',
             'price_selling' => 'Price Selling',
-            'comment' => 'Comment',
         ];
     }
 

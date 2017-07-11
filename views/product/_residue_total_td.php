@@ -1,0 +1,1 @@
+﻿<b><?= number_format($residuePurchase + $residueDebt + $cashbox, 2, '.', ' '); ?> руб.</b>

@@ -36,7 +36,7 @@ class Ad extends \yii\db\ActiveRecord
             [['price'], 'number'],
             [['ad_type'], 'string'],
             [['amount'], 'integer'],
-            [['creator'], 'string', 'max' => 255],
+            [['creator'], 'url'],
         ];
     }
 

@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\db\Query;
 use app\models\Outlay;
+use app\models\Pickup;
 
 /**
  * This is the model class for table "income".
@@ -126,5 +127,16 @@ class Income extends \yii\db\ActiveRecord
             'type' => $type,
             'income_date' => $month,
         ]);
+    }
+    
+    public static function calcCashbox()
+    {
+        $thisMonth = Yii::$app->params['thisMonth'];
+        $income = Income::getIncomeByMonth(Income::GROUP_REVENUE, $thisMonth);
+        $outlays = Outlay::getTotalByMonth($thisMonth);
+        $totalPickup = Pickup::getTotalByMonth($thisMonth);
+        $incomeAmount = $income ? $income->amount : 0;
+        $cashbox = $incomeAmount - $outlays - $totalPickup;
+        return $cashbox;
     }
 }

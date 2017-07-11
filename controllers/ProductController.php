@@ -12,6 +12,8 @@ use app\models\ProductDetail;
 use app\models\Site;
 use app\models\ProductSold;
 use app\models\ProductRender;
+use app\models\Sync;
+use app\models\Income;
 
 class ProductController extends ProtectedController
 {
@@ -88,9 +90,11 @@ class ProductController extends ProtectedController
             $product->price_selling = $_POST['price_selling'];
             if ($product->save()) {
                 $site = Site::findOne($product->site_id);
+                $p = Product::findOne($_POST['product_id']);
                 return $this->renderPartial('_price_selling_td', [
                     'product' => $product,
                     'sitename' => $site->name,
+                    'p' => $p,
                 ]);
             }
         }
@@ -98,30 +102,44 @@ class ProductController extends ProtectedController
     
     public function actionUpdatecomment()
     {
-        $product = ProductDetail::getDetailsBySite($_POST['site_id'], $_POST['product_id']);
+        $product = Product::findOne($_POST['product_id']);
         $product->comment = $_POST['comment'];
         if ($product->save()) {
-            $site = Site::findOne($_POST['site_id']);
             return $this->renderPartial('_comment_td', [
                 'product' => $product,
-                'sitename' => $site->name,
             ]);
         }
     }
     
     public function actionUpdateincome()
     {
-        $thisMonth = date("Y-m-01");
-        $product = ProductDetail::getDetailsBySite($_POST['site_id'], $_POST['product_id']);
-        $amount_sold = ProductSold::getTotalByProduct($product->id, $thisMonth);
-        $income = number_format(sprintf("%01.2f", $product->price_selling * $amount_sold['amount']), 2, '.', ' ');
-        return $income;
+        $thisMonth = Yii::$app->params['thisMonth'];
+        if (is_numeric($_POST['price_selling'])) {
+            $sites = Site::find()->all();
+            $product = Product::findOne($_POST['product_id']);
+            foreach ($sites as $site) {
+                $product_details = ProductDetail::getDetailsBySite($site->id, $product->id);
+                $product_sold = ProductSold::findOne([
+                    'product_id' => $product->id,
+                    'sale_date' => $thisMonth,
+                    'site_id' => $site->id
+                ]);
+                if ($product_sold) {
+                    $product_sold->income_total = $product_details->price_selling * $product_sold->amount;
+                    $product_sold->save();
+                }
+            }
+            return $this->renderPartial('_income_td', [
+                'sites' => $sites,
+                'product' => $product,
+            ]);
+        }
     }
     
     public function actionRender()
     {
         $msg = '';
-        $thisMonth = date("Y-m-01");
+        $thisMonth = Yii::$app->params['thisMonth'];
         
         if (isset($_POST['render'])) {
             $product = new ProductRender();
@@ -164,5 +182,90 @@ class ProductController extends ProtectedController
                 ]);
             }
         }
+    }
+    
+    public function actionUpdateincomeclear()
+    {
+        if (is_numeric($_POST['product_id'])) {
+            $sites = Site::find()->all();
+            $product = Product::findOne($_POST['product_id']);
+            foreach ($sites as $site) {
+                $product_detail = ProductDetail::findOne([
+                    'inner_product_id' => $product->id,
+                    'site_id' => $site->id
+                ]);
+                $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
+                $product_detail->save();
+            }
+            return $this->renderPartial('_income_clear_td', [
+                'sites' => $sites,
+                'product' => $product,
+            ]);
+        }
+    }
+    
+    public function actionUpdateincomecleartotal()
+    {
+        $thisMonth = Yii::$app->params['thisMonth'];
+        if (is_numeric($_POST['product_id'])) {
+            $sites = Site::find()->all();
+            $product = Product::findOne($_POST['product_id']);
+            foreach ($sites as $site) {
+                $product_details = ProductDetail::getDetailsBySite($site->id, $product->id);
+                $product_sold = ProductSold::findOne([
+                    'product_id' => $product->id,
+                    'sale_date' => $thisMonth,
+                    'site_id' => $site->id
+                ]);
+                if ($product_sold) {
+                    $product_sold->income_clear_total = ($product_details->price_selling - $product->price_purchase) * $product_sold->amount;
+                    $product_sold->save();
+                }
+            }
+            
+            return $this->renderPartial('_income_clear_total_td', [
+                'sites' => $sites,
+                'product' => $product,
+            ]);
+        }
+    }
+    
+    public function actionUpdaterevenue()
+    {
+        $thisMonth = Yii::$app->params['thisMonth'];
+        $products = Product::find()->all();
+        Sync::saveIncome($products);
+        $incomes = Income::getIncomesByMonth($thisMonth);
+        return $this->renderPartial('_revenue_tbl', [
+            'incomes' => $incomes,
+        ]);
+    }
+    
+    public function actionUpdatecashbox()
+    {
+        return $this->renderPartial('_cashbox_container', [
+            'cashbox' => Income::calcCashbox(),
+        ]);
+    }
+    
+    public function actionUpdateresiduepurchase()
+    {
+        $thisMonth = Yii::$app->params['thisMonth'];
+        $residuePurchase = Product::getResiduePurchase($thisMonth);
+        return $this->renderPartial('_residue_purchase_td', [
+            'residuePurchase' => $residuePurchase,
+        ]);
+    }
+    
+    public function actionUpdateresiduetotal()
+    {
+        $thisMonth = Yii::$app->params['thisMonth'];
+        $residuePurchase = Product::getResiduePurchase($thisMonth);
+        $residueDebt = 0;
+        return $this->renderPartial('_residue_total_td', [
+            'residuePurchase' => $residuePurchase,
+            'residueDebt' => $residueDebt,
+            'cashbox' => Income::calcCashbox(),
+        ]);
     }
 }

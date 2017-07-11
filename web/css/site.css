@@ -161,3 +161,56 @@ div.tree-multiselect {
 	border: none;
 	height: auto;
 }
+#sidebar {
+    min-width: 300px;
+    max-width: 300px;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+#sidebar a {
+	color: #333;
+}
+#sidebar li {
+	margin-bottom: 5px;
+}
+.td-title {
+	background-color: #777;
+	font-style: italic;
+	font-weight: 700;
+	color: #FFF;
+}
+#back-top {
+   position: fixed;
+   bottom: 0px;
+   padding: 0px;
+   left: 0;
+   margin-left: 10px;
+   z-index:99991;
+   display: none;
+}
+#back-top a{
+   width: 77px;
+   height: 30px;
+   background: rgba(0, 0, 0, 0.25);
+   display:block;
+   text-decoration:none;
+   -webkit-transition: all linear 0.2s; 
+   -moz-transition: all linear 0.2s;
+   -ms-transition: all linear 0.2s;
+   -o-transition: all linear 0.2s;
+   transition: all linear 0.2s;
+   text-align: center;
+   color: #333;
+}
+#back-top a:hover{
+   height: 70px;
+   background: #663399;
+   -webkit-transition: all linear 0.2s; 
+   -moz-transition: all linear 0.2s;
+   -ms-transition: all linear 0.2s;
+   -o-transition: all linear 0.2s;
+   transition: all linear 0.2s;
+   color: #fff;
+}

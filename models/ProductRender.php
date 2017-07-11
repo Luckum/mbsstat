@@ -62,12 +62,12 @@ class ProductRender extends \yii\db\ActiveRecord
         return $this->hasOne(Product::className(), ['id' => 'product_id']);
     }
     
-    public static function getRenderTotal($product_id)
+    public static function getRenderTotal($product_id, $month)
     {
         $query = new Query();
         $query->select(['SUM(amount) AS amount', 'SUM(render_price) AS render_price'])
             ->from(self::tableName())
-            ->where(['product_id' => $product_id]);
+            ->where(['product_id' => $product_id, 'render_date' => $month]);
         
         $command = $query->createCommand();
         return $command->queryOne();

@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS `product_detail` (
     `site_id` int(11) NOT NULL,
     `price_selling` decimal(12,2) NOT NULL,
     `product_id` int(11) NOT NULL,
-    `comment` text DEFAULT NULL,
     `inner_product_id` int(11) NOT NULL,
+    `income_clear` decimal(12,2) NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
     FOREIGN KEY (`inner_product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `product` (
     `price_purchase` decimal(12,2) NOT NULL DEFAULT '0.00',
     `amount_supplied` int(8) NOT NULL DEFAULT '0',
     `amount_in_stock` int(8) NOT NULL,
+    `comment` text DEFAULT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;

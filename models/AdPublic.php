@@ -32,7 +32,7 @@ class AdPublic extends \yii\db\ActiveRecord
         return [
             [['ad_group', 'ad_id'], 'required'],
             [['ad_id'], 'integer'],
-            [['ad_group'], 'string', 'max' => 255],
+            [['ad_group'], 'url'],
             [['ad_id'], 'exist', 'skipOnError' => true, 'targetClass' => Ad::className(), 'targetAttribute' => ['ad_id' => 'id']],
         ];
     }
@@ -65,7 +65,8 @@ class AdPublic extends \yii\db\ActiveRecord
                 'ad_public.*'
             ])
             ->from(self::tableName())
-            ->join('LEFT JOIN', 'ad', 'ad_public.ad_id = ad.id');
+            ->join('LEFT JOIN', 'ad', 'ad_public.ad_id = ad.id')
+            ->orderBy('ad_id');
             
         $command = $query->createCommand();
         return $command->queryAll();

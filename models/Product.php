@@ -15,6 +15,7 @@ use yii\db\Query;
  * @property string $price_purchase
  * @property integer $amount_supplied
  * @property integer $amount_in_stock
+ * @property string $comment
  *
  * @property Category $category
  * @property ProductDetail $details
@@ -40,6 +41,7 @@ class Product extends \yii\db\ActiveRecord
             [['price_purchase'], 'number'],
             [['product_code'], 'string', 'max' => 32],
             [['product_name'], 'string', 'max' => 255],
+            [['comment'], 'string'],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['category_id' => 'id']],
         ];
     }
@@ -57,6 +59,7 @@ class Product extends \yii\db\ActiveRecord
             'price_purchase' => 'Price Purchase',
             'amount_supplied' => 'Amount Supplied',
             'amount_in_stock' => 'Amount In Stock',
+            'comment' => 'Comment'
         ];
     }
 
@@ -122,5 +125,20 @@ class Product extends \yii\db\ActiveRecord
         
         $command = $query->createCommand();
         return $command->queryOne();
+    }
+    
+    public static function getProductsDetails($categoryId)
+    {
+        $query = new Query;
+        $query->select([
+                'product.*',
+                'product_detail.*'
+            ])
+            ->from('product')
+            ->join('LEFT JOIN', 'product_detail', 'product.id=product_detail.inner_product_id')
+            ->where(['category_id' => $categoryId]);
+        
+        $command = $query->createCommand();
+        return $command->queryAll();
     }
 }
