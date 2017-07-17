@@ -20,12 +20,14 @@ class ProductController extends ProtectedController
     public function actionAccept()
     {
         $msg = '';
+        $thisMonth = Yii::$app->params['thisMonth'];
         if (isset($_POST['accept'])) {
             $add_amount = !empty($_POST['amount']) && is_numeric($_POST{'amount'}) ? $_POST['amount'] : 0;
             $product_id = $_POST['product'];
             if (isset($_POST['old_price']) && $_POST['old_price'] == 'Y') {
                 $product = Product::findOne($product_id);
                 $product->amount_supplied += $add_amount;
+                $product->amount_in_stock += $add_amount;
                 if ($product->save()) {
                     $msg = 'Товар принят на склад.';
                 }
@@ -39,13 +41,40 @@ class ProductController extends ProtectedController
                     $product->new_price_purchase = $new_price;
                     $product->amount = $add_amount;
                     if ($product->save()) {
-                        $msg = 'Товар принят на склад';
+                        $product_old->amount_supplied += $add_amount;
+                        $product_old->amount_in_stock += $add_amount;
+                        if ($product_old->save()) {
+                            $msg = 'Товар принят на склад';
+                        }
                     }
                 } else {
                     $product = Product::findOne($product_id);
                     $product->amount_supplied += $add_amount;
+                    $product->amount_in_stock += $add_amount;
                     $product->price_purchase = $new_price;
                     if ($product->save()) {
+                        $sites = Site::find()->all();
+                        foreach ($sites as $site) {
+                            $product_detail = ProductDetail::findOne([
+                                'inner_product_id' => $product->id,
+                                'site_id' => $site->id
+                            ]);
+                            $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
+                            $product_detail->save();
+                            
+                            $product_sold = ProductSold::findOne([
+                                'product_id' => $product->id,
+                                'sale_date' => $thisMonth,
+                                'site_id' => $site->id
+                            ]);
+                            if ($product_sold) {
+                                $product_sold->income_clear_total = ($product_detail->price_selling - $product->price_purchase) * $product_sold->amount;
+                                $product_sold->save();
+                            }
+                        }
+                        $products = Product::find()->all();
+                        Sync::saveIncome($products);
+                        $incomes = Income::getIncomesByMonth($thisMonth);
                         $msg = 'Товар принят на склад';
                     }
                 }
@@ -148,6 +177,9 @@ class ProductController extends ProtectedController
             $product->render_price = $_POST['price'];
             $product->render_date = $thisMonth;
             if ($product->save()) {
+                $prod = Product::findOne($_POST['product']);
+                $prod->amount_in_stock = $prod->amount_in_stock - $_POST['amount'];
+                $prod->save();
                 $msg = 'Товар списан';
             }
         }
@@ -266,6 +298,14 @@ class ProductController extends ProtectedController
             'residuePurchase' => $residuePurchase,
             'residueDebt' => $residueDebt,
             'cashbox' => Income::calcCashbox(),
+        ]);
+    }
+    
+    public function actionRenderlist()
+    {
+        $products = ProductRender::find()->with('product')->with('product.category')->orderBy('render_date DESC')->all();
+        return $this->render('renderlist', [
+            'products' => $products,
         ]);
     }
 }

@@ -1,7 +1,7 @@
 <div class="form-group">
     <label class="col-sm-2 control-label">Сейчас на складе</label>
     <div class="col-sm-4">
-        <label class="control-label"><?= $details['amount_supplied']; ?> шт.</label>
+        <label class="control-label"><?= $details['amount_in_stock']; ?> шт.</label>
     </div>
 </div>
 
@@ -35,13 +35,13 @@
     </div>
 </div>
 
-<div class="form-group" id="sold_old" style="display: none;">
+<!--<div class="form-group" id="sold_old" style="display: none;">
     <label for="sold_old_price" class="col-sm-2 control-label">Продать остаток по старой цене</label>
     <div class="col-sm-4">
         <input type="checkbox" id="sold_old_price" name="sold_old_price" value="Y">
         <span class="help-block">Если вы хотите, чтобы остаток товаров был продан по старой цене, отметьте это поле. Новую цену продажи вы сможете указать на странице отчета</span>
     </div>
-</div>
+</div>-->
 
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">

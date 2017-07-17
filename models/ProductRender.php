@@ -72,4 +72,11 @@ class ProductRender extends \yii\db\ActiveRecord
         $command = $query->createCommand();
         return $command->queryOne();
     }
+    
+    public static function getSumRenderByProduct($product_id)
+    {
+        return self::find()->where([
+            'product_id' => $product_id,
+        ])->sum('amount');
+    }
 }

@@ -39,10 +39,10 @@ $this->title = Yii::$app->params['name'];
         'items' => [
             ['label' => 'Отчет', 'url' => ['/stat/report']],
             ['label' => 'ТОП ПРОДАЖ', 'url' => ['/stat/top']],
-            ['label' => 'Реклама', 'url' => ['/ad/index'], 'active' => Yii::$app->controller->id == 'ad'],
+            ['label' => 'Реклама', 'url' => ['/ad/index'], 'active' => Yii::$app->controller->id == 'ad', 'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->group == 'admin'],
             ['label' => 'Принять товар', 'url' => ['/product/accept']],
-            ['label' => 'Списать товар', 'url' => ['/product/render']],
-            ['label' => 'Синхронизация', 'url' => ['/sync/index'], 'active' => Yii::$app->controller->id == 'sync'],
+            ['label' => 'Списать товар', 'url' => ['/product/render'], 'active' => Yii::$app->controller->action->id == 'render' || Yii::$app->controller->action->id == 'renderlist', 'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->group == 'admin'],
+            ['label' => 'Синхронизация', 'url' => ['/sync/index'], 'active' => Yii::$app->controller->id == 'sync', 'visible' => !Yii::$app->user->isGuest && Yii::$app->user->identity->group == 'admin'],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
             ) : (

@@ -19,8 +19,11 @@ class ProtectedController extends Controller
     
     public function beforeAction($action)
     {
-        //if (!in_array($action->id, $this->publicActions)) return $this->redirect(Url::to(Yii::$app->user->loginUrl, true));
-        
+        if (Yii::$app->user->isGuest) {
+            if (!in_array($action->id, $this->publicActions)) return $this->redirect(Url::to(Yii::$app->user->loginUrl, true));
+        } else {
+            
+        }
         return parent::beforeAction($action);
     }
 }

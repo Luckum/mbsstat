@@ -16,6 +16,8 @@ use app\models\Products;
  */
 class ProductPrices extends \yii\db\ActiveRecord
 {
+    public static $db;
+
     /**
      * @inheritdoc
      */
@@ -29,7 +31,7 @@ class ProductPrices extends \yii\db\ActiveRecord
      */
     public static function getDb()
     {
-        return Yii::$app->get('db_mbs');
+        return self::$db;
     }
 
     /**
@@ -40,7 +42,7 @@ class ProductPrices extends \yii\db\ActiveRecord
         return [
             [['product_id', 'lower_limit', 'usergroup_id'], 'required'],
             [['product_id', 'percentage_discount', 'lower_limit', 'usergroup_id'], 'integer'],
-            [['price'], 'number'],
+            [['price', 'price_t'], 'number'],
             [['product_id', 'usergroup_id', 'lower_limit'], 'unique', 'targetAttribute' => ['product_id', 'usergroup_id', 'lower_limit'], 'message' => 'The combination of Product ID, Lower Limit and Usergroup ID has already been taken.'],
         ];
     }
@@ -65,5 +67,12 @@ class ProductPrices extends \yii\db\ActiveRecord
                 LEFT JOIN ' . Products::tableName() . ' cp ON cpp.product_id = cp.product_id
                 WHERE cp.product_code = :product_code';
         return self::findBySql($sql, ['product_code' => $code])->one();
+    }
+    
+    public static function setPrice($product_id, $price)
+    {
+        self::$db->createCommand()
+            ->update(self::tableName(), ['price_t' => $price], 'product_id = ' . $product_id)
+            ->execute();
     }
 }

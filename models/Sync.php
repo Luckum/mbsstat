@@ -10,6 +10,9 @@ use app\models\ProductDetail;
 use app\models\Income;
 use app\models\ProductRender;
 use app\models\Product;
+use app\models\Products;
+use app\models\ProductDescriptions;
+use app\models\ProductsCategories;
 
 class Sync extends yii\base\Model
 {
@@ -31,10 +34,12 @@ class Sync extends yii\base\Model
                     $product_sold->site_id = $site_id;
                 }
                 $product_details = ProductDetail::getDetailsBySite($site_id, $product->id);
-                $product_sold->income_clear_total = ($product_details->price_selling - $product->price_purchase) * $total['total'];
-                $product_sold->income_total = $product_details->price_selling * $total['total'];
-                $product_sold->amount = $total['total'];
-                $product_sold->save();
+                if ($product_details) {
+                    $product_sold->income_clear_total = ($product_details->price_selling - $product->price_purchase) * $total['total'];
+                    $product_sold->income_total = $product_details->price_selling * $total['total'];
+                    $product_sold->amount = $total['total'];
+                    $product_sold->save();
+                }
             }
         }
     }
@@ -92,8 +97,10 @@ class Sync extends yii\base\Model
                 'site_id' => $site_id
             ]);
             
-            $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
-            $product_detail->save();
+            if ($product_detail) {
+                $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
+                $product_detail->save();
+            }
         }
     }
     
@@ -101,10 +108,69 @@ class Sync extends yii\base\Model
     {
         foreach ($products as $product) {
             $product_sold_total = ProductSold::getSumByProductTotal($product['id']);
+            $product_render_total = ProductRender::getSumRenderByProduct($product['id']);
             $prod = Product::findOne($product['id']);
-            $prod->amount_in_stock = $product['amount_supplied'] - $product_sold_total;
+            $prod->amount_in_stock = $product['amount_supplied'] - $product_sold_total - $product_render_total;
             $prod->save();
             
+        }
+    }
+    
+    public static function getNewProducts($site_id)
+    {
+        $products = Products::getProducts();
+        foreach ($products as $k => $product) {
+            if (!Product::find()->where(['product_code' => $product['product_code']])->exists()) {
+                $p_descr = ProductDescriptions::getProductName($product['product_id']);
+                $p_category = ProductsCategories::getProductCategory($product['product_id']);
+                $p_price = ProductPrices::getProductPriceByCode($product['product_code']);
+                
+                $to_product = new Product();
+                $to_product->product_code = $product['product_code'];
+                $to_product->product_name = $p_descr['product'];
+                $to_product->category_id = $p_category['category_id'];
+                $to_product->amount_supplied = $product['amount'];
+                $to_product->save();
+                
+                $product_id = Yii::$app->db->getLastInsertID();
+                
+                $to_product_detail = new ProductDetail();
+                $to_product_detail->site_id = $site_id;
+                $to_product_detail->price_selling = $p_price['price'];
+                $to_product_detail->product_id = $product['product_id'];
+                $to_product_detail->inner_product_id = $product_id;
+                $to_product_detail->save();
+            } else {
+                $prod = Product::find()->where(['product_code' => $product['product_code']])->one();
+                if (!ProductDetail::find()->where(['site_id' => $site_id, 'inner_product_id' => $prod->id])->exists()) {
+                    $p_price = ProductPrices::getProductPriceByCode($product['product_code']);
+                    
+                    $to_product_detail = new ProductDetail();
+                    $to_product_detail->site_id = $site_id;
+                    $to_product_detail->price_selling = $p_price['price'];
+                    $to_product_detail->product_id = $product['product_id'];
+                    $to_product_detail->inner_product_id = $prod->id;
+                    $to_product_detail->save();
+                }
+            }
+        }
+    }
+    
+    public static function setChangesToSite($products, $site_id)
+    {
+        foreach ($products as $product) {
+            $prod = Products::find()->where(['product_code' => $product['product_code']])->one();
+            if ($prod) {
+                if ($prod->amount_t != $product['amount_in_stock']) {
+                    Products::setAmount($product['product_code'], $product['amount_in_stock']);
+                }
+                $prod_price = ProductPrices::find()->where(['product_id' => $prod->product_id])->one();
+                $product_detail = ProductDetail::getDetailsBySite($site_id, $product['id']);
+                if ($prod_price->price_t != $product_detail->price_selling) {
+                    $prod_price->price_t = $product_detail->price_selling;
+                    $prod_price->save();
+                }
+            }
         }
     }
 }

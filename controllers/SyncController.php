@@ -56,12 +56,18 @@ class SyncController extends ProtectedController
         $site->save();
         */
         
-        $products = Product::find()->all();
         $site = Site::findOne($id);
         Orders::$db = Yii::$app->get($site->cfg_alias);
+        Products::$db = Yii::$app->get($site->cfg_alias);
+        ProductPrices::$db = Yii::$app->get($site->cfg_alias);
+        Sync::getNewProducts($site->id);
+        $products = SyncSetting::getProductsBySite($site->id);
         Sync::saveSold($products, $site->id);
-        Sync::savePrice($products, $site->id);
+        //Sync::savePrice($products, $site->id);
+        Sync::saveReport($products, $site->id);
         Site::saveSyncDate($site->id);
+        Sync::setChangesToSite($products, $site->id);
+        Sync::saveAmount($products);
         Sync::saveIncome($products);
                 
         $this->redirect(Url::to('sync/index', true));

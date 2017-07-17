@@ -7,7 +7,10 @@ use yii\bootstrap\ActiveForm;
 ?>
 
 
-<h3 class="page-header">Списать товар</h3>
+<h3 class="page-header">
+    Списать товар
+    <a name="render_list" href="<?= Url::to(['/product/renderlist']); ?>" type="button" class="btn btn-primary pull-right">Списанные товары</a>
+</h3>
 <br />
 
 <?php if (!empty($msg)): ?>

@@ -80,4 +80,28 @@ class SyncSetting extends \yii\db\ActiveRecord
     {
         return SyncSetting::find()->where(['product_id' => $product_id, 'site_id' => $site_id])->exists();
     }
+    
+    public static function getProductsBySite($site_id)
+    {
+        $products = [];
+        $sync_products = self::find()->with('product')->where(['site_id' => $site_id])->all();
+        if ($sync_products) {
+            foreach ($sync_products as $row) {
+                $products[] = $row->product;
+            }
+        }
+        return $products;
+    }
+    
+    public static function getProductsUnique()
+    {
+        $products = [];
+        $sync_products = self::find()->with('product')->groupBy('product_id')->all();
+        if ($sync_products) {
+            foreach ($sync_products as $row) {
+                $products[] = $row->product;
+            }
+        }
+        return $products;
+    }
 }

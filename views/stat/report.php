@@ -159,61 +159,63 @@ $sitesCnt = count($sites);
     <?php endforeach; ?>
         <div class="tab-pane" id="summary">
             <br />
-            <?php Modal::begin([
-                'id' => 'outlay_modal',
-                'header' => '<h4>' . 'Добавить затраты' . '</h4>',
-                'toggleButton' => ['label' => 'Добавить затраты', 'class' => 'btn btn-success'],
-                'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
-                             <button id="add-outlay" class="btn btn-success" type="submit" onclick="addOutlay()" data-dismiss="modal">' . 'Добавить' . '</button>',
-            ]); ?>
+            <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->group == 'admin'): ?>
+                <?php Modal::begin([
+                    'id' => 'outlay_modal',
+                    'header' => '<h4>' . 'Добавить затраты' . '</h4>',
+                    'toggleButton' => ['label' => 'Добавить затраты', 'class' => 'btn btn-success'],
+                    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                                 <button id="add-outlay" class="btn btn-success" type="submit" onclick="addOutlay()" data-dismiss="modal">' . 'Добавить' . '</button>',
+                ]); ?>
+                    
+                    <form action="" method="post" id="outlay-add-form">
+                        <div class="form-group">
+                            <label for="outlay-type" class="control-label">Тип затрат</label>
+                            <input type="text" class="form-control" id="outlay-type" name="type">
+                            <label for="outlay-amount" class="control-label">Сумма, руб.</label>
+                            <input type="text" class="form-control" id="outlay-amount" name="amount">
+                        </div>
+                    </form>
                 
-                <form action="" method="post" id="outlay-add-form">
-                    <div class="form-group">
-                        <label for="outlay-type" class="control-label">Тип затрат</label>
-                        <input type="text" class="form-control" id="outlay-type" name="type">
-                        <label for="outlay-amount" class="control-label">Сумма, руб.</label>
-                        <input type="text" class="form-control" id="outlay-amount" name="amount">
-                    </div>
-                </form>
-            
-            <?php Modal::end(); ?>
-            
-            <?php Modal::begin([
-                'id' => 'outlay_modal_edit',
-                'header' => '<h4>' . 'Редактировать затраты' . '</h4>',
-                'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
-                             <button id="add-outlay" class="btn btn-success" type="submit" onclick="updateOutlay()" data-dismiss="modal">' . 'Сохранить' . '</button>',
-            ]); ?>
+                <?php Modal::end(); ?>
                 
-                <form action="" method="post" id="outlay-add-form">
-                    <div class="form-group">
-                        <label for="outlay-type-edit" class="control-label">Тип затрат</label>
-                        <input type="text" class="form-control" id="outlay-type-edit" name="type">
-                        <label for="outlay-amount-edit" class="control-label">Сумма, руб.</label>
-                        <input type="text" class="form-control" id="outlay-amount-edit" name="amount">
-                        <input type="hidden" id="outlay-id-edit" value="">
-                    </div>
-                </form>
-            
-            <?php Modal::end(); ?>
-            
-            <?php Modal::begin([
-                'id' => 'pickup_modal',
-                'header' => '<h4>' . 'Забрать' . '</h4>',
-                'toggleButton' => ['label' => 'Забрать', 'class' => 'btn btn-success'],
-                'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
-                             <button id="pickup" class="btn btn-success" type="submit" onclick="pickup()" data-dismiss="modal">' . 'Забрать' . '</button>',
-            ]); ?>
+                <?php Modal::begin([
+                    'id' => 'outlay_modal_edit',
+                    'header' => '<h4>' . 'Редактировать затраты' . '</h4>',
+                    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                                 <button id="add-outlay" class="btn btn-success" type="submit" onclick="updateOutlay()" data-dismiss="modal">' . 'Сохранить' . '</button>',
+                ]); ?>
+                    
+                    <form action="" method="post" id="outlay-add-form">
+                        <div class="form-group">
+                            <label for="outlay-type-edit" class="control-label">Тип затрат</label>
+                            <input type="text" class="form-control" id="outlay-type-edit" name="type">
+                            <label for="outlay-amount-edit" class="control-label">Сумма, руб.</label>
+                            <input type="text" class="form-control" id="outlay-amount-edit" name="amount">
+                            <input type="hidden" id="outlay-id-edit" value="">
+                        </div>
+                    </form>
                 
-                <form action="" method="post" id="pickup-form">
-                    <div class="form-group">
-                        <label for="pickup-amount" class="control-label">Сумма, руб.</label>
-                        <input type="text" class="form-control" id="pickup-amount" name="amount">
-                    </div>
-                </form>
-            
-            <?php Modal::end(); ?>
-            <br /><br />
+                <?php Modal::end(); ?>
+                
+                <?php Modal::begin([
+                    'id' => 'pickup_modal',
+                    'header' => '<h4>' . 'Забрать' . '</h4>',
+                    'toggleButton' => ['label' => 'Забрать', 'class' => 'btn btn-success'],
+                    'footer' => '<a class="btn btn-default" data-dismiss="modal" aria-hidden="true">' . 'Закрыть' . '</a>
+                                 <button id="pickup" class="btn btn-success" type="submit" onclick="pickup()" data-dismiss="modal">' . 'Забрать' . '</button>',
+                ]); ?>
+                    
+                    <form action="" method="post" id="pickup-form">
+                        <div class="form-group">
+                            <label for="pickup-amount" class="control-label">Сумма, руб.</label>
+                            <input type="text" class="form-control" id="pickup-amount" name="amount">
+                        </div>
+                    </form>
+                
+                <?php Modal::end(); ?>
+                <br /><br />
+            <?php endif; ?>
             
             <div id="summary_t">
                 <div id="revenue-tbl">
@@ -234,11 +236,13 @@ $sitesCnt = count($sites);
                         <tr>
                             <td><span class="o-type"><?= $outlay->type; ?></span></td>
                             <td><span class="o-amount"><?= number_format($outlay->amount, 2, '.', ' '); ?></span></td>
-                            <td>
-                                <a href="javascript:void(0);" title="Редактировать" data-toggle="modal" data-target="#outlay_modal_edit" onclick="showOutlayModal(this);"><span class="glyphicon glyphicon-pencil"></span></a>
-                                <a href="javascript:void(0)" title="Удалить" onclick="deleteOutlay(this);"><span class="glyphicon glyphicon-trash"></span></a>
-                                <input type="hidden" class="o-id" value="<?= $outlay->id; ?>">
-                            </td>
+                            <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->group == 'admin'): ?>
+                                <td>
+                                    <a href="javascript:void(0);" title="Редактировать" data-toggle="modal" data-target="#outlay_modal_edit" onclick="showOutlayModal(this);"><span class="glyphicon glyphicon-pencil"></span></a>
+                                    <a href="javascript:void(0)" title="Удалить" onclick="deleteOutlay(this);"><span class="glyphicon glyphicon-trash"></span></a>
+                                    <input type="hidden" class="o-id" value="<?= $outlay->id; ?>">
+                                </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
                 </table>
