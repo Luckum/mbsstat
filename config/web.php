@@ -22,6 +22,10 @@ $config = [
             'loginUrl' => 'login',
             'authTimeout' => 60*60*24,
         ],
+        'formatter' => [
+               'class' => 'yii\i18n\Formatter',
+               'defaultTimeZone' => 'Europe/Moscow',
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],

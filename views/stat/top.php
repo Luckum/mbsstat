@@ -6,6 +6,7 @@ use yii\helpers\Url;
 use app\models\ProductSold;
 
 $prevCat = '';
+Yii::$app->formatter->locale = 'ru-RU';
 ?>
 
 <h3 class="page-header">

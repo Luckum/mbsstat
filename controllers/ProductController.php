@@ -226,8 +226,10 @@ class ProductController extends ProtectedController
                     'inner_product_id' => $product->id,
                     'site_id' => $site->id
                 ]);
-                $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
-                $product_detail->save();
+                if ($product_detail) {
+                    $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
+                    $product_detail->save();
+                }
             }
             return $this->renderPartial('_income_clear_td', [
                 'sites' => $sites,

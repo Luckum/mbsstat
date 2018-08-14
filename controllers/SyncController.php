@@ -8,6 +8,8 @@ use app\controllers\ProtectedController;
 use app\models\Sync;
 use app\models\Product;
 use app\models\Orders;
+use app\models\Products;
+use app\models\ProductPrices;
 use app\models\Site;
 use app\models\Category;
 use app\models\SyncSetting;

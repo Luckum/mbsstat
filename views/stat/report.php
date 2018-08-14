@@ -10,6 +10,7 @@ use kartik\editable\Editable;
 use app\models\ProductDetail;
 
 $sitesCnt = count($sites);
+Yii::$app->formatter->locale = 'ru-RU';
 ?>
 
 

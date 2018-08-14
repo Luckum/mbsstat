@@ -122,7 +122,7 @@ class StatController extends ProtectedController
             'pickups' => $pickups,
             'error' => $error,
             'totalPickup' => $totalPickup,
-            'cashbox' => $this->calcCashbox(),
+            'cashbox' => Income::calcCashbox(),
             'residuePurchase' => $residuePurchase,
             'residueDebt' => $residueDebt,
         ]);
