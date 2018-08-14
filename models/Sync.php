@@ -35,8 +35,10 @@ class Sync extends yii\base\Model
                 }
                 $product_details = ProductDetail::getDetailsBySite($site_id, $product->id);
                 if ($product_details) {
-                    $product_sold->income_clear_total = ($product_details->price_selling - $product->price_purchase) * $total['total'];
-                    $product_sold->income_total = $product_details->price_selling * $total['total'];
+                    //$product_sold->income_clear_total = ($product_details->price_selling - $product->price_purchase) * $total['total'];
+                    $product_sold->income_clear_total = $total['total_price'] - $product->price_purchase * $total['total'];
+                    //$product_sold->income_total = $product_details->price_selling * $total['total'];
+                    $product_sold->income_total = $total['total_price'];
                     $product_sold->amount = $total['total'];
                     $product_sold->save();
                 }
