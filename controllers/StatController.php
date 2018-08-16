@@ -13,6 +13,8 @@ use app\models\Product;
 use app\models\ProductDetail;
 use app\models\ProductSold;
 use app\models\Site;
+use app\models\Ad;
+use app\models\AdOther;
 
 class StatController extends ProtectedController
 {
@@ -31,6 +33,7 @@ class StatController extends ProtectedController
         $sites = Site::find()->all();
         $statMonthes = ProductSold::getStatMonthes();
         $residueDebt = 0;
+        $adTotal = Ad::getAdTotal($thisMonth) + AdOther::getAdTotal($thisMonth);
         return $this->render('report', [
             'categories' => $categories,
             'outlays' => $outlays,
@@ -43,6 +46,7 @@ class StatController extends ProtectedController
             'sites' => $sites,
             'statMonthes' => $statMonthes,
             'thisMonth' => $thisMonth,
+            'adTotal' => $adTotal,
         ]);
     }
     

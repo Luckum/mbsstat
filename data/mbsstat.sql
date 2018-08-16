@@ -96,6 +96,9 @@ CREATE TABLE IF NOT EXISTS `ad` (
     `price` decimal(12,2) NOT NULL,
     `ad_type` enum('C', 'P') NOT NULL,
     `amount` int(11) NOT NULL,
+	`paid_date` date NOT NULL,
+	`next_pay_date` date NOT NULL,
+	`period` date NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
@@ -128,4 +131,23 @@ CREATE TABLE IF NOT EXISTS `sync_setting` (
     PRIMARY KEY (`id`),
     FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
     FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `ad_category` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(100) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `ad_other` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+	`ad_category_id` int(11) NOT NULL,
+	`name` varchar(100) NOT NULL,
+    `price` decimal(12, 2) NOT NULL,
+	`paid_date` date NOT NULL,
+	`next_pay_date` date NOT NULL,
+	`period` date NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`ad_category_id`) REFERENCES `ad_category` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;

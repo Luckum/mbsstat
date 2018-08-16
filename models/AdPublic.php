@@ -57,7 +57,7 @@ class AdPublic extends \yii\db\ActiveRecord
         return $this->hasOne(Ad::className(), ['id' => 'ad_id']);
     }
     
-    public static function getAds()
+    public static function getAds($month = '')
     {
         $query = new Query;
         $query->select([
@@ -66,8 +66,12 @@ class AdPublic extends \yii\db\ActiveRecord
             ])
             ->from(self::tableName())
             ->join('LEFT JOIN', 'ad', 'ad_public.ad_id = ad.id')
+            ->groupBy('ad_public.ad_group')
             ->orderBy('ad_id');
             
+        if (!empty($month)) {
+            $query->where(['ad.period' => $month]);
+        }
         $command = $query->createCommand();
         return $command->queryAll();
     }

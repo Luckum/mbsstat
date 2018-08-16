@@ -3,6 +3,7 @@
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
 
+$months = range(1, 12);
 ?>
 
 
@@ -25,9 +26,9 @@ use yii\bootstrap\ActiveForm;
     </div>
     <?php foreach ($ad_publics as $k => $public): ?>
         <div class="form-group" id="public-container-<?= $public['id']; ?>">
-            <label for="creator" class="col-sm-2 control-label"><?php if ($k == 0): ?>Паблики<?php endif; ?></label>
+            <label for="public" class="col-sm-2 control-label"><?php if ($k == 0): ?>Паблики<?php endif; ?></label>
             <div class="col-sm-4">
-                <input type="text" class="form-control" id="creator" name="creator" value="<?= $public['ad_group']; ?>" readonly>
+                <input type="text" class="form-control" id="public" name="public[]" value="<?= $public['ad_group']; ?>" readonly>
             </div>
             <a href="javascript:void(0)" title="Удалить" onclick="deletePublic(<?= $public['id']; ?>);"><i class="fa fa-times" style="margin-top: 10px; color: red;"></i></a>
         </div>
@@ -48,6 +49,30 @@ use yii\bootstrap\ActiveForm;
             <select id="ad_type" name="ad_type" class="form-control">
                 <option value="C" <?php if ($ad['ad_type'] == 'C'): ?>selected<?php endif; ?>>Комментариев</option>
                 <option value="P" <?php if ($ad['ad_type'] == 'P'): ?>selected<?php endif; ?>>Постов</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="paid_date" class="col-sm-2 control-label">Дата оплаты</label>
+        <div class="col-sm-2">
+            <input type="date" class="form-control" id="paid_date" name="paid_date" value="<?= $ad['paid_date'] ?>">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="next_pay_date" class="col-sm-2 control-label">Следующая дата оплаты</label>
+        <div class="col-sm-2">
+            <input type="date" class="form-control" id="next_pay_date" name="next_pay_date" value="<?= $ad['next_pay_date'] ?>">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="period" class="col-sm-2 control-label">Период оплаты</label>
+        <div class="col-sm-2">
+            <select id="period" name="period">
+                <?php foreach ($months as $month): ?>
+                    <option value="<?= $month ?>" <?php if (!empty($ad['period']) && date('n', strtotime($ad['period'])) == $month): ?> selected <?php elseif (empty($ad['period']) && date('n') == $month): ?> selected <?php endif; ?>>
+                        <?= Yii::$app->formatter->asDate('2018-' . $month . '-01', 'LLLL'); ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
         </div>
     </div>

@@ -13,8 +13,11 @@ use yii\db\Query;
  * @property string $price
  * @property string $ad_type
  * @property integer $amount
+ * @property string $paid_date
+ * @property string $next_pay_date
+ * @property string $period
  *
- * @property AdPublic $adPublic
+ * @property AdPublic[] $adPublics
  */
 class Ad extends \yii\db\ActiveRecord
 {
@@ -36,7 +39,8 @@ class Ad extends \yii\db\ActiveRecord
             [['price'], 'number'],
             [['ad_type'], 'string'],
             [['amount'], 'integer'],
-            [['creator'], 'url'],
+            [['paid_date', 'next_pay_date', 'period'], 'safe'],
+            [['creator'], 'string', 'max' => 255],
         ];
     }
 
@@ -51,17 +55,44 @@ class Ad extends \yii\db\ActiveRecord
             'price' => 'Price',
             'ad_type' => 'Ad Type',
             'amount' => 'Amount',
+            'paid_date' => 'Paid Date',
+            'next_pay_date' => 'Next Pay Date',
+            'period' => 'Period',
         ];
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAdPublics()
+    {
+        return $this->hasMany(AdPublic::className(), ['ad_id' => 'id']);
+    }
     
-    public static function getAdTotal()
+    public static function getAdTotal($month)
     {
         $query = new Query();
         $query->select(['SUM(price) AS price'])
-            ->from(self::tableName());
+            ->from(self::tableName())
+            ->where(['period' => $month]);
         
         $command = $query->createCommand();
         $ad = $command->queryOne();
         return $ad['price'];
+    }
+    
+    public static function getAdMonthes()
+    {
+        $query = new Query;
+        $query->select([
+            'period'
+        ])
+        ->from('ad')
+        ->where('period IS NOT NULL')
+        ->groupBy('period')
+        ->orderBy('period DESC');
+        
+        $command = $query->createCommand();
+        return $command->queryAll();
     }
 }

@@ -224,7 +224,7 @@ Yii::$app->formatter->locale = 'ru-RU';
                         <?php foreach ($incomes as $income): ?>
                             <tr>
                                 <td><?= $income->type; ?></td>
-                                <td><?= number_format($income->amount, 2, '.', ' '); ?></td>
+                                <td><?= $income->type == Income::GROUP_REVENUE_CLEAR ? number_format($income->amount - $adTotal, 2, '.', ' ') : number_format($income->amount, 2, '.', ' '); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
@@ -233,6 +233,10 @@ Yii::$app->formatter->locale = 'ru-RU';
                 <p><b>ЗАТРАТЫ</b></p>
                 
                 <table class="table table-striped table-bordered table-hover">
+                    <tr>
+                        <td><span class="o-type">Реклама</span></td>
+                        <td><span class="o-amount"><?= number_format($adTotal, 2, '.', ' '); ?></span></td>
+                    </tr>
                     <?php foreach ($outlays as $outlay): ?>
                         <tr>
                             <td><span class="o-type"><?= $outlay->type; ?></span></td>
@@ -262,7 +266,7 @@ Yii::$app->formatter->locale = 'ru-RU';
                         <td><b><?= number_format($totalPickup, 2, '.', ' '); ?> руб.</b></td>
                     </tr>
                 </table>
-                <p id="cashbox-container"><b>В КАССЕ: <?= number_format($cashbox, 2, '.', ' '); ?> руб.</b></p>
+                <p id="cashbox-container"><b>В КАССЕ: <?= number_format($cashbox - $adTotal , 2, '.', ' '); ?> руб.</b></p>
                 
                 <p><b>ОСТАТОК</b></p>
                 <table class="table table-striped table-bordered table-hover">
@@ -276,7 +280,7 @@ Yii::$app->formatter->locale = 'ru-RU';
                     </tr>
                     <tr>
                         <td><b>ОБЩАЯ</b></td>
-                        <td id="residue-total-td"><b><?= number_format($residuePurchase + $residueDebt + $cashbox, 2, '.', ' '); ?> руб.</b></td>
+                        <td id="residue-total-td"><b><?= number_format($residuePurchase + $residueDebt + $cashbox - $adTotal, 2, '.', ' '); ?> руб.</b></td>
                     </tr>
                 </table>
             </div>

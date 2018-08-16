@@ -77,8 +77,8 @@ class Sync extends yii\base\Model
             if ($amount_sold) {
                 foreach ($amount_sold as $amount) {
                     $product_detail = ProductDetail::getDetailsBySite($amount->site_id, $amount->product_id);
-                    $totalRevenue +=  $product_detail->price_selling * $amount->amount;
-                    $totalRevenueClear +=  ($product_detail->price_selling - $product->price_purchase) * $amount->amount;
+                    $totalRevenue +=  $amount->income_total;
+                    $totalRevenueClear +=  $amount->income_clear_total;
                 }
                 $render = ProductRender::getRenderTotal($product->id, $thisMonth);
                 if ($render) {

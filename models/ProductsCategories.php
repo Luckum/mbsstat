@@ -57,7 +57,7 @@ class ProductsCategories extends \yii\db\ActiveRecord
     
     public static function getProductCategory($id)
     {
-        $sql = 'SELECT category_id FROM ' . self::tableName() . ' WHERE product_id = :product_id';
+        $sql = 'SELECT category_id FROM ' . self::tableName() . ' WHERE product_id = :product_id AND link_type = "M"';
         return self::findBySql($sql, ['product_id' => $id])->one();
     }
 }
