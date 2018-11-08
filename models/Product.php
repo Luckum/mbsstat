@@ -22,6 +22,7 @@ use yii\db\Query;
  */
 class Product extends \yii\db\ActiveRecord
 {
+    public $sum;
     /**
      * @inheritdoc
      */
@@ -70,6 +71,14 @@ class Product extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Category::className(), ['id' => 'category_id']);
     }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductSolds()
+    {
+        return $this->hasMany(ProductSold::className(), ['product_id' => 'id']);
+    }
 
     public static function getProductsByCategory($categoryId)
     {
@@ -90,17 +99,27 @@ class Product extends \yii\db\ActiveRecord
     
     public static function getResiduePurchase($month)
     {
-        $query = new Query;
-        $query->select([
-                'SUM(product.price_purchase * (product.amount_supplied - product_sold.amount)) AS sum'
-            ])
-            ->from('product')
-            ->join('LEFT JOIN', 'product_sold', 'product_sold.product_id = product.id')
-            ->where(['product_sold.sale_date' => $month]);
-        
-        $command = $query->createCommand();
-        $residue = $command->queryOne();
-        return $residue['sum'];
+        $residue = 0;
+        $products = self::find()->where(['!=', 'amount_supplied', '0'])->andWhere(['!=', 'price_purchase', '0'])->all();
+        if ($products) {
+            foreach ($products as $product) {
+                $res = self::find()
+                    ->select(['product.price_purchase * (product.amount_supplied - product_sold.amount) AS sum'])
+                    ->joinWith(['productSolds'])
+                    ->where(['product_sold.sale_date' => $month, 'product.id' => $product->id])
+                    ->one();
+                
+                if (!$res) {
+                    $res = self::find()
+                        ->select(['`product`.`price_purchase` * `product`.`amount_supplied` AS sum'])
+                        ->where(['id' => $product->id])
+                        ->one();
+                }
+                
+                $residue += $res->sum;
+            }
+        }
+        return $residue;
     }
     
     public static function getProducts($categoryId)

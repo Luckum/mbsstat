@@ -42,7 +42,7 @@ class ProductPrices extends \yii\db\ActiveRecord
         return [
             [['product_id', 'lower_limit', 'usergroup_id'], 'required'],
             [['product_id', 'percentage_discount', 'lower_limit', 'usergroup_id'], 'integer'],
-            [['price', 'price_t'], 'number'],
+            [['price'], 'number'],
             [['product_id', 'usergroup_id', 'lower_limit'], 'unique', 'targetAttribute' => ['product_id', 'usergroup_id', 'lower_limit'], 'message' => 'The combination of Product ID, Lower Limit and Usergroup ID has already been taken.'],
         ];
     }
@@ -65,14 +65,14 @@ class ProductPrices extends \yii\db\ActiveRecord
     {
         $sql = 'SELECT cpp.price, cpp.product_id FROM ' . self::tableName() . ' cpp
                 LEFT JOIN ' . Products::tableName() . ' cp ON cpp.product_id = cp.product_id
-                WHERE cp.product_code = :product_code';
+                WHERE cp.product_code = :product_code AND cpp.lower_limit = 1';
         return self::findBySql($sql, ['product_code' => $code])->one();
     }
     
     public static function setPrice($product_id, $price)
     {
         self::$db->createCommand()
-            ->update(self::tableName(), ['price_t' => $price], 'product_id = ' . $product_id)
+            ->update(self::tableName(), ['price' => $price], 'product_id = ' . $product_id)
             ->execute();
     }
 }

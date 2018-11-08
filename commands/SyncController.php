@@ -32,7 +32,7 @@ class SyncController extends Controller
             echo "products got" . "\n";
             Sync::saveSold($products, $site->id);
             echo "sold saved" . "\n";
-            //Sync::savePrice($products, $site->id);
+            Sync::savePrice($products, $site->id);
             Sync::saveReport($products, $site->id);
             echo "report saved" . "\n";
             Site::saveSyncDate($site->id);

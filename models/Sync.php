@@ -163,13 +163,13 @@ class Sync extends yii\base\Model
         foreach ($products as $product) {
             $prod = Products::find()->where(['product_code' => $product['product_code']])->one();
             if ($prod) {
-                if ($prod->amount_t != $product['amount_in_stock']) {
+                if ($prod->amount != $product['amount_in_stock']) {
                     Products::setAmount($product['product_code'], $product['amount_in_stock']);
                 }
                 $prod_price = ProductPrices::find()->where(['product_id' => $prod->product_id])->one();
                 $product_detail = ProductDetail::getDetailsBySite($site_id, $product['id']);
-                if ($prod_price->price_t != $product_detail->price_selling) {
-                    $prod_price->price_t = $product_detail->price_selling;
+                if ($prod_price->price != $product_detail->price_selling) {
+                    $prod_price->price = $product_detail->price_selling;
                     $prod_price->save();
                 }
             }

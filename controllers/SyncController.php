@@ -58,6 +58,7 @@ class SyncController extends ProtectedController
         $site->save();
         */
         
+        set_time_limit(10000);
         $site = Site::findOne($id);
         Orders::$db = Yii::$app->get($site->cfg_alias);
         Products::$db = Yii::$app->get($site->cfg_alias);
@@ -65,7 +66,7 @@ class SyncController extends ProtectedController
         Sync::getNewProducts($site->id);
         $products = SyncSetting::getProductsBySite($site->id);
         Sync::saveSold($products, $site->id);
-        //Sync::savePrice($products, $site->id);
+        Sync::savePrice($products, $site->id);
         Sync::saveReport($products, $site->id);
         Site::saveSyncDate($site->id);
         Sync::setChangesToSite($products, $site->id);

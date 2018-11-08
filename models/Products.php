@@ -104,7 +104,7 @@ class Products extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'amount', 'length', 'width', 'height', 'low_avail_limit', 'timestamp', 'updated_timestamp', 'return_period', 'avail_since', 'min_qty', 'max_qty', 'qty_step', 'list_qty_count', 'age_limit', 'yml_bid', 'yml_cbid', 'cp_delivery_date', 'cp_number_of_columns', 'amount_t'], 'integer'],
+            [['company_id', 'amount', 'length', 'width', 'height', 'low_avail_limit', 'timestamp', 'updated_timestamp', 'return_period', 'avail_since', 'min_qty', 'max_qty', 'qty_step', 'list_qty_count', 'age_limit', 'yml_bid', 'yml_cbid', 'cp_delivery_date', 'cp_number_of_columns'], 'integer'],
             [['list_price', 'weight', 'shipping_freight', 'yml_cost'], 'number'],
             [['facebook_obj_type', 'yml_brand', 'yml_origin_country', 'yml_model', 'yml_sales_notes', 'yml_type_prefix', 'yml_market_category', 'yml_manufacturer_warranty', 'yml_seller_warranty', 'buy_now_url', 'cp_additinal_product_items'], 'required'],
             [['cp_additinal_product_items', 'use_geo'], 'string'],
@@ -208,7 +208,7 @@ class Products extends \yii\db\ActiveRecord
     public static function setAmount($product_code, $amount)
     {
         self::$db->createCommand()
-            ->update(self::tableName(), ['amount_t' => $amount], 'product_code = "' . $product_code . '"')
+            ->update(self::tableName(), ['amount' => $amount], 'product_code = "' . $product_code . '"')
             ->execute();
     }
 }

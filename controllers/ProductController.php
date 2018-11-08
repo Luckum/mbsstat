@@ -55,21 +55,20 @@ class ProductController extends ProtectedController
                     if ($product->save()) {
                         $sites = Site::find()->all();
                         foreach ($sites as $site) {
-                            $product_detail = ProductDetail::findOne([
-                                'inner_product_id' => $product->id,
-                                'site_id' => $site->id
-                            ]);
-                            $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
-                            $product_detail->save();
-                            
-                            $product_sold = ProductSold::findOne([
-                                'product_id' => $product->id,
-                                'sale_date' => $thisMonth,
-                                'site_id' => $site->id
-                            ]);
-                            if ($product_sold) {
-                                $product_sold->income_clear_total = ($product_detail->price_selling - $product->price_purchase) * $product_sold->amount;
-                                $product_sold->save();
+                            $product_detail = ProductDetail::getDetailsBySite($site->id, $product->id);
+                            if ($product_detail) {
+                                $product_detail->income_clear = $product_detail->price_selling - $product->price_purchase;
+                                $product_detail->save();
+                                
+                                $product_sold = ProductSold::findOne([
+                                    'product_id' => $product->id,
+                                    'sale_date' => $thisMonth,
+                                    'site_id' => $site->id
+                                ]);
+                                if ($product_sold) {
+                                    $product_sold->income_clear_total = ($product_detail->price_selling - $product->price_purchase) * $product_sold->amount;
+                                    $product_sold->save();
+                                }
                             }
                         }
                         $products = Product::find()->all();
