@@ -154,6 +154,11 @@ class Sync extends yii\base\Model
                     $to_product_detail->inner_product_id = $prod->id;
                     $to_product_detail->save();
                 }
+                $p_descr = ProductDescriptions::getProductName($product['product_id']);
+                if ($prod->product_name != $p_descr['product']) {
+                    $prod->product_name = $p_descr['product'];
+                    $prod->save();
+                }
             }
         }
     }
